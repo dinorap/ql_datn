@@ -1,0 +1,31 @@
+.chc {
+    height: 38px !important;
+    width : max-content;
+}
+
+.first {
+    text-align: center !important;
+
+    a {
+        text-decoration: none;
+        color          : black;
+
+        &:hover {
+            color: rgb(13, 126, 233);
+        }
+    }
+}
+
+.search-date {
+    width: 305px;
+}
+
+.act {
+    width: 172px;
+
+}
+
+.gift-fi {
+    width     : 500px;
+    text-align: justify !important;
+}

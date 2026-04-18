@@ -1,0 +1,43 @@
+.companyMenu {
+    margin: 10px 0 0px;
+}
+
+.companyMenu a {
+    border             : 2px solid #fff;
+    height             : 40px;
+    line-height        : 40px;
+    transition-duration: .2s;
+}
+
+
+.companyMenu a img {
+
+    vertical-align: middle;
+
+}
+
+.companies {
+    border             : 2px solid #fff;
+    height             : 40px;
+    line-height        : 40px;
+    transition-duration: .2s;
+    margin             : 5px;
+
+    img {
+        height        : 100%;
+        width         : 140px;
+        vertical-align: middle;
+        margin-bottom : 5px;
+
+    }
+
+    &.selected {
+        border: 2px solid red;
+    }
+
+    &:hover {
+        border   : 2px solid #aaa;
+        transform: scale(1.2);
+        z-index  : 20;
+    }
+}

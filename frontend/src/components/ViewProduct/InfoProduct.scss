@@ -1,0 +1,329 @@
+.variant-option-wrapper {
+    padding         : 15px;
+    background-color: white;
+    border-radius   : 10px;
+    box-shadow      : 0 4px 8px rgba(0, 0, 0, 0.15);
+
+    .color {
+        padding: 5px 10px !important;
+    }
+
+    .toggle-button-group {
+        display         : inline-flex;
+        align-items     : center;
+        justify-content : center;
+        background-color: #fff !important;
+
+        border       : 1px solid #ccc;
+        border-radius: 6px;
+        padding      : 8px 18px;
+        margin       : 4px;
+        cursor       : pointer;
+        position     : relative;
+        transition   : all 0.3s;
+        font-size    : 16px;
+
+        &.active {
+            border-color: red;
+            color       : black;
+
+            &::after {
+                content                : "";
+                position               : absolute;
+                top                    : -1px;
+                right                  : -1px;
+                width                  : 0;
+                height                 : 0;
+                border-top             : 20px solid red;
+                border-left            : 20px solid transparent;
+                border-top-right-radius: 4px;
+                z-index                : 1;
+            }
+
+            &::before {
+                content  : "✔";
+                color    : white;
+                font-size: 10px;
+                position : absolute;
+                top      : -2px;
+                right    : 0px;
+                z-index  : 2;
+            }
+        }
+    }
+
+    .img-color {
+        margin-right: 5px;
+        width       : 37px;
+        height      : 37px;
+        object-fit  : cover;
+    }
+
+    .product-name {
+        text-align : left;
+        font-size  : 20px;
+        font-weight: 600;
+    }
+
+    .evaluate {
+        display    : flex;
+        align-items: center;
+        font-size  : 16px;
+        color      : #333;
+        margin-left: 5px;
+        line-height: 16px;
+
+        padding-right: 20px;
+
+        .star {
+            color       : #fadb14;
+            margin-right: 4px;
+            font-size   : 16px;
+        }
+
+        .score {
+            margin-right: 8px;
+            font-weight : 500;
+            color       : #000;
+        }
+
+        .count {
+            color        : #1677ff;
+            cursor       : pointer;
+            border-right : 0.1px solid rgb(216, 216, 216);
+            padding-right: 10px;
+        }
+
+        .specifications {
+            color      : #1677ff;
+            cursor     : pointer;
+            margin-left: 10px;
+        }
+    }
+
+    .product-info {
+        display: flex;
+    }
+}
+
+.variant-selector {
+    display    : flex;
+    align-items: center;
+
+    .selector {
+        display  : flex;
+        flex-wrap: wrap !important;
+    }
+
+    .title-selector {
+        text-align: left;
+        min-width : 120px;
+
+
+        p {
+            font-size  : 16px;
+            font-weight: 600;
+            color      : #696969;
+
+            margin-bottom: 0;
+        }
+
+    }
+
+
+}
+
+.option-selector {
+    margin-top: 16px;
+
+    h4 {
+        margin-bottom: 8px;
+        font-size    : 16px;
+        font-weight  : 600;
+    }
+
+    button {
+        margin          : 4px;
+        padding         : 8px 16px;
+        border          : 1px solid #ccc;
+        background-color: white;
+        border-radius   : 20px;
+        cursor          : pointer;
+        font-size       : 14px;
+        transition      : all 0.3s ease;
+
+        &:hover {
+            border-color: #1890ff;
+            color       : #1890ff;
+        }
+
+        &.active {
+            background-color: #1890ff;
+            color           : white;
+            border-color    : #1890ff;
+            font-weight     : 500;
+        }
+    }
+}
+
+.button {
+    display   : flex;
+    gap       : 10px;
+    margin-top: 25px;
+
+    .cart {
+        background-color: white;
+        width           : 15%;
+        border-radius   : 15px;
+        box-shadow      : 0 4px 8px rgba(0, 0, 0, 0.15);
+        color           : red;
+        display         : flex;
+        align-items     : center;
+        justify-content : center;
+        font-size       : 30px;
+    }
+
+    .buy-now {
+        display         : flex;
+        align-items     : center;
+        justify-content : center;
+        background-color: #dd1616;
+        ;
+        width        : 40%;
+        border-radius: 15px;
+        box-shadow   : 0 4px 8px rgba(0, 0, 0, 0.15);
+        color        : white;
+        font-size    : 17px;
+    }
+
+    .buy-installment {
+        background-color: #2323c5;
+        width           : 45%;
+        border-radius   : 15px;
+        box-shadow      : 0 4px 8px rgba(0, 0, 0, 0.15);
+        font-size       : 17px;
+        color           : white;
+        padding         : 10px;
+
+        p {
+            margin-bottom: 0px;
+        }
+    }
+}
+
+.variant-price {
+    margin-top      : 10px;
+    padding         : 15px;
+    background-color: white;
+    border-radius   : 10px;
+    box-shadow      : 0 4px 8px rgba(0, 0, 0, 0.15);
+
+    .avertise {
+        position     : relative;
+        margin-top   : 25px !important;
+        margin       : 10px;
+        box-shadow   : 0 4px 8px rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
+        border       : 1px solid #e5e5e5;
+        text-align   : left;
+        padding      : 10px;
+
+
+        .content {
+            padding-top: 20px;
+        }
+
+        p {
+            margin-bottom: 4px;
+        }
+
+        .discount-badge {
+            display            : flex;
+            align-items        : center;
+            justify-content    : center;
+            background         : url(data:image/png;base64,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) no-repeat center;
+            background-size    : 114% 100%;
+            background-repeat  : no-repeat;
+            position           : absolute;
+            top                : -15px;
+            left               : -15px;
+            padding            : 0px 15px;
+            height             : 41px;
+            width              : fit-content;
+            border-radius      : 4px;
+            font-size          : 14px;
+            font-weight        : bold;
+            color              : white;
+            white-space        : nowrap;
+            background-position: left center;
+        }
+    }
+
+    .price_installment {
+        display        : flex;
+        align-items    : center;
+        justify-content: space-between;
+        gap            : 30px;
+
+
+
+        .price {
+            text-align: left;
+
+            .final_price {
+                font-size  : 30px;
+                color      : red;
+                font-weight: 600;
+            }
+
+            .base_price {
+                font-size: 16px;
+
+                .base-price-small {
+                    margin-right   : 5px;
+                    text-decoration: line-through;
+                }
+
+                .discount {
+                    color: red;
+                }
+            }
+
+            .installment {
+                color: black;
+
+                font-size: 16px;
+            }
+
+            .installment_price {
+                color    : black;
+                font-size: 20px;
+            }
+        }
+
+
+    }
+
+}
+
+.button.out-of-stock-msg {
+    background     : #ffffff;
+    color          : #ff0000;
+    border         : 1px solid #ffbdbd;
+    border-radius  : 8px;
+    padding        : 18px 0;
+    font-size      : 1.2rem;
+    font-weight    : 600;
+    text-align     : center;
+    margin         : 18px 0 0 0;
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    gap            : 10px;
+    box-shadow     : 0 4px 8px rgba(0, 0, 0, 0.15);
+
+    .sold-out {
+        font-size: 30px;
+        color    : rgb(255, 0, 0);
+    }
+}

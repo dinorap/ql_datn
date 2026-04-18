@@ -1,0 +1,43 @@
+.compare-modal-overlay {
+    position       : fixed;
+    inset          : 0;
+    background     : rgba(0, 0, 0, 0.3);
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    z-index        : 999;
+}
+
+.compare-modal {
+    background   : #fff;
+    border-radius: 8px;
+    width        : 500px;
+    max-height   : 80vh;
+    overflow-y   : auto;
+    padding      : 24px 20px 16px;
+    box-shadow   : 0 8px 16px rgba(0, 0, 0, 0.2);
+    position     : relative;
+    overflow-y   : auto;
+
+
+
+}
+
+.compare-modal .close-btn {
+    position  : absolute;
+    top       : 0px;
+    right     : 13px;
+    background: none;
+    border    : none;
+    font-size : 25px;
+    color     : #444;
+    cursor    : pointer;
+}
+
+.compare-modal .compare-suggestion-item {
+    display      : flex;
+    gap          : 12px;
+    padding      : 8px;
+    cursor       : pointer;
+    border-bottom: 1px solid #eee;
+}

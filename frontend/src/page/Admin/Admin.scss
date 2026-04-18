@@ -1,0 +1,17 @@
+.app-container {
+    display   : flex;
+    min-height: 100vh;
+}
+
+.admin-content {
+    flex-grow       : 1;
+    margin-left     : 250px;
+    padding         : 20px;
+    background-color: #f5f6fa;
+    transition      : margin-left 0.3s ease;
+}
+
+
+.sidebar.collapsed~.admin-content {
+    margin-left: 70px;
+}

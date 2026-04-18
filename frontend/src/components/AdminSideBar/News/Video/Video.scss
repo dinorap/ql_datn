@@ -1,0 +1,66 @@
+.add-users {
+    display    : flex;
+    align-items: center;
+}
+
+.modal-add-user {
+    margin-top: 150px;
+
+    .img-preview {
+        border         : 1px dashed #ccc;
+        color          : #ccc;
+        display        : flex;
+        justify-content: center;
+        align-items    : center;
+        height         : 150px;
+
+        img {
+            max-width : 100%;
+            max-height: 100%;
+        }
+    }
+
+    .label-upload {
+        display      : flex;
+        align-items  : center;
+        width        : fit-content;
+        padding      : 3px 10px;
+        border-radius: 5px;
+        background   : #eeeeee;
+        cursor       : pointer;
+        gap          : 5px;
+
+        &:hover {
+            background: #a2a2a2;
+        }
+    }
+}
+
+.first {
+    text-align: center !important;
+
+    a {
+        text-decoration: none;
+        color          : black;
+
+        &:hover {
+            color: rgb(13, 126, 233);
+        }
+    }
+}
+
+.crud_video {
+    width: 250px;
+}
+
+.success {
+    height: 38px;
+}
+
+.ant-table-thead {
+    text-align: center !important;
+}
+
+.twice {
+    text-align: justify
+}

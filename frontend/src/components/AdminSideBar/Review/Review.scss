@@ -1,0 +1,20 @@
+.first {
+    text-align: center !important;
+
+    a {
+        text-decoration: none;
+        color          : black;
+
+        &:hover {
+            color: rgb(13, 126, 233);
+        }
+    }
+}
+
+.height {
+    height: 35px;
+}
+
+.ok {
+    margin-top: -70px !important;
+}

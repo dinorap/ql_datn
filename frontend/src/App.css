@@ -1,0 +1,31 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #f2f4f7;
+
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.web {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* zoom          : 90%; */
+
+}
+
+
+.web-content {
+  flex: 1;
+
+  max-width: 1350px;
+  margin   : 0 auto;
+}

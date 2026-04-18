@@ -1,0 +1,111 @@
+.notfound-container {
+    margin             : 0;
+    padding            : 0px;
+    height             : 100vh;
+    display            : flex;
+    justify-content    : center;
+    align-items        : center;
+    background-image   : url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif);
+    background-color   : white;
+    background-repeat  : no-repeat;
+    width              : 100%;
+    background-position: center;
+    font-family        : Arial, sans-serif;
+    overflow           : hidden;
+    flex-direction     : column;
+    color              : rgb(0, 0, 0);
+    text-align         : center;
+
+}
+
+.development-container {
+    margin         : 0;
+    padding        : 0px;
+    height         : 111vh;
+    display        : flex;
+    justify-content: center;
+    align-items    : center;
+    background     : linear-gradient(135deg, #03173b, #031638);
+    font-family    : Arial, sans-serif;
+    overflow       : hidden;
+    flex-direction : column;
+    color          : white;
+    text-align     : center;
+    z-index        : 10;
+
+    img {
+        width : 800px;
+        height: 400px;
+    }
+}
+
+
+
+.error-code {
+    margin-bottom: 200px;
+    font-size    : 120px;
+    font-weight  : bold;
+    animation    : blink 1.5s infinite;
+    text-shadow  : 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.message {
+    font-size: 24px;
+    margin   : 20px 0;
+}
+
+.back-btn {
+    display         : inline-block;
+    padding         : 12px 25px;
+    background-color: #ff4444;
+    color           : white;
+    text-decoration : none;
+    border-radius   : 25px;
+    font-size       : 18px;
+    transition      : transform 0.3s, background-color 0.3s;
+}
+
+.back-btn:hover {
+    transform       : scale(1.1);
+    background-color: #ff6666;
+}
+
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+
+.particle {
+    position     : absolute;
+    bottom       : 0;
+    width        : 5px;
+    height       : 5px;
+    background   : rgb(5, 30, 255);
+    border-radius: 50%;
+    animation    : float 5s infinite ease-in-out;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0);
+        opacity  : 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: translateY(-100vh);
+        opacity  : 0;
+    }
+}
