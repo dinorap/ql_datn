@@ -61,12 +61,16 @@ const Signup = () => {
         <>
             <div className="home">
                 <div className="Auth">
-                    <form>
+                    <form className="auth-visual">
+                        <div className="visual-top">
+                            <Link to="/" className="back-home-btn">Quay lại trang chủ</Link>
+                        </div>
                         <img src={SignupImage} alt="" srcSet="" />
                     </form>
-                    <form className="myform">
-                        <h3 style={{ marginBottom: "-13px" }}>
-                            Xin chào <em>👋</em>, Chào mừng bạn!
+                    <form className="myform auth-panel">
+                        <p className="auth-subtitle">Tạo tài khoản mới</p>
+                        <h3>
+                        Tạo một tài khoản
                         </h3>
                         <div>
                             <input type="email" placeholder="Địa chỉ Email" required
@@ -109,7 +113,7 @@ const Signup = () => {
                                     {isLoading ? <ImSpinner10 className="loader-icon" /> : "Đăng ký"}
                                 </button>
                                 <p>
-                                    Đã có tài khoản <Link to="/login">Đăng nhập</Link>
+                                    Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
                                 </p>
                             </div>
                         </div>

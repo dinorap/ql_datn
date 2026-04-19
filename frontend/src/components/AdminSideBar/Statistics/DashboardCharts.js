@@ -10,9 +10,13 @@ import {
     getRevenueByProduct,
 } from '../../../services/apiStatistics';
 import dayjs from 'dayjs';
+import './DashboardCharts.scss';
 
 const { RangePicker } = DatePicker;
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EF0', '#F08080', '#6AC259'];
+const COLORS = ['#f97316', '#ef4444', '#fb7185', '#fb923c', '#dc2626', '#fca5a5', '#fdba74'];
+
+const formatCurrency = (value = 0) =>
+    `${Number(value || 0).toLocaleString('vi-VN')} đ`;
 
 const DashboardCharts = () => {
     const [topProducts, setTopProducts] = useState([]);
@@ -66,10 +70,41 @@ const DashboardCharts = () => {
         fetchData();
     }, [dateRange]);
 
+    const totalRevenue = dailyRevenue.reduce((sum, item) => sum + Number(item.daily_revenue || 0), 0);
+    const avgRevenuePerDay = dailyRevenue.length > 0 ? totalRevenue / dailyRevenue.length : 0;
+    const totalUnitsSold = topProducts.reduce((sum, item) => sum + Number(item.total_sold || 0), 0);
+
+    const statCards = [
+        {
+            key: 'total-revenue',
+            title: 'Tổng doanh thu',
+            value: formatCurrency(totalRevenue),
+            toneClass: 'tone-1',
+        },
+        {
+            key: 'top-sold',
+            title: 'Sản phẩm đã bán',
+            value: Number(totalUnitsSold).toLocaleString('vi-VN'),
+            toneClass: 'tone-2',
+        },
+        {
+            key: 'avg-revenue',
+            title: 'Doanh thu trung bình/ngày',
+            value: formatCurrency(avgRevenuePerDay),
+            toneClass: 'tone-3',
+        },
+        {
+            key: 'category-count',
+            title: 'Số danh mục có doanh thu',
+            value: Number(revenueByCategory.length).toLocaleString('vi-VN'),
+            toneClass: 'tone-4',
+        },
+    ];
+
     return (
-        <div style={{ padding: 20 }}>
-            <Space style={{ marginBottom: 20 }}>
-                <span>📅 Chọn khoảng thời gian:</span>
+        <div className="dashboard-charts">
+            <Space className="dashboard-charts__date-filter">
+                <span>Chọn khoảng thời gian:</span>
                 <RangePicker
                     value={dateRange}
                     onChange={(dates) => {
@@ -79,20 +114,31 @@ const DashboardCharts = () => {
                 />
             </Space>
 
+            <Row gutter={[16, 16]} className="dashboard-charts__stats">
+                {statCards.map((card) => (
+                    <Col key={card.key} xs={24} sm={12} xl={6}>
+                        <div className={`stats-card ${card.toneClass}`}>
+                            <p className="stats-card__value">{card.value}</p>
+                            <span className="stats-card__label">{card.title}</span>
+                        </div>
+                    </Col>
+                ))}
+            </Row>
+
             <Row gutter={[16, 16]}>
                 <Col xs={24} lg={12}>
-                    <Card title="🔝 Top 10 sản phẩm bán chạy" bordered={false}>
+                    <Card title="Top 10 sản phẩm bán chạy" bordered={false} className="dashboard-card">
                         <ResponsiveContainer width="100%" height={350}>
                             <BarChart
                                 data={topProducts}
                                 layout="vertical"
                                 margin={{ top: 20, right: 30, left: -5, bottom: 20 }}
                             >
-                                <CartesianGrid strokeDasharray="3 3" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#ffd9d2" />
                                 <XAxis type="number" />
                                 <YAxis dataKey="product_name" type="category" width={120} />
                                 <Tooltip formatter={(value) => `${value} sản phẩm`} />
-                                <Bar dataKey="total_sold" fill="#8884d8" name="Số lượng bán" />
+                                <Bar dataKey="total_sold" fill="#f97316" name="Số lượng bán" radius={[0, 8, 8, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
 
@@ -102,7 +148,7 @@ const DashboardCharts = () => {
 
 
                 <Col xs={24} lg={12}>
-                    <Card title="📊 Doanh thu theo danh mục" bordered={false}>
+                    <Card title="Doanh thu theo danh mục" bordered={false} className="dashboard-card">
                         {revenueByCategory.length > 0 ? (
                             <ResponsiveContainer width="100%" height={350}>
                                 <PieChart>
@@ -126,7 +172,7 @@ const DashboardCharts = () => {
                             </ResponsiveContainer>
 
                         ) : (
-                            <div style={{ textAlign: 'center', padding: 50, color: '#999' }}>
+                            <div className="dashboard-charts__empty">
                                 Không có dữ liệu doanh thu theo danh mục
                             </div>
                         )}
@@ -134,14 +180,21 @@ const DashboardCharts = () => {
                     </Card>
                 </Col>
                 <Col xs={24} >
-                    <Card title="📈 Doanh thu theo ngày" bordered={false}>
+                    <Card title="Doanh thu theo ngày" bordered={false} className="dashboard-card">
                         <ResponsiveContainer width="100%" height={350}>
                             <LineChart data={dailyRevenue} margin={{ top: 20, right: 30, left: 30, bottom: 10 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#ffd9d2" />
                                 <XAxis dataKey="sale_date" />
                                 <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} width={70} />
                                 <Tooltip formatter={(value) => `${value.toLocaleString('vi-VN')} VNĐ`} />
-                                <Line type="monotone" dataKey="daily_revenue" stroke="#82ca9d" name="Doanh thu (VNĐ)" />
+                                <Line
+                                    type="monotone"
+                                    dataKey="daily_revenue"
+                                    stroke="#ef4444"
+                                    strokeWidth={3}
+                                    dot={{ r: 3, fill: '#ef4444' }}
+                                    name="Doanh thu (VNĐ)"
+                                />
                             </LineChart>
                         </ResponsiveContainer>
                     </Card>

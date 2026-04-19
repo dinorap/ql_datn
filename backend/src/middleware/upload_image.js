@@ -2,10 +2,13 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+/** Luôn ghi vào backend/public/... dù chạy server từ thư mục khác (cwd). */
+const publicRoot = path.join(__dirname, '../../public');
+
 const createUpload = (fieldName, uploadDir, multiple = false) => {
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
-            const fullPath = path.join(process.cwd(), 'public', uploadDir);
+            const fullPath = path.join(publicRoot, uploadDir);
             fs.mkdirSync(fullPath, { recursive: true });
             cb(null, fullPath);
         },

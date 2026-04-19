@@ -155,7 +155,7 @@ const getTopProductsByCategory = async (req, res) => {
                 AND pi.is_primary = 1
             WHERE p.category_id = ? AND p.is_active = 1
             GROUP BY p.id  
-            LIMIT 10
+            LIMIT 8
         `, [category_id]);
 
 

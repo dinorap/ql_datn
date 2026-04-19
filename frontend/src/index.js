@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { ConfigProvider } from 'antd';
 import './index.css';
 import "bootstrap/dist/css/bootstrap.min.css";
 import App from './App';
@@ -20,7 +21,6 @@ import 'nprogress/nprogress.css'
 import { Cart } from './page/Cart/Cart';
 import Admin from './page/Admin/Admin';
 import ThongKe from './page/Admin/AdminOtherPage/ThongKe'
-import ChatWidgetController from './components/Header&Footer/ChatWidgetController';
 import ATinTuc from './page/Admin/AdminOtherPage/ATinTuc';
 import QuangCao from './page/Admin/AdminOtherPage/QuangCao';
 
@@ -54,6 +54,15 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 
 
 root.render(
+  <ConfigProvider
+    theme={{
+      token: {
+        colorPrimary: '#d70018',
+        colorLink: '#d70018',
+        colorLinkHover: '#b80014',
+      },
+    }}
+  >
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <BrowserRouter>
@@ -167,7 +176,6 @@ root.render(
 
 
         </Routes>
-        <ChatWidgetController />
         <ToastContainer
           position="top-center"
           autoClose={5000}
@@ -184,6 +192,7 @@ root.render(
       </BrowserRouter>
     </PersistGate>
   </Provider>
+  </ConfigProvider>
 );
 reportWebVitals();
 

@@ -6,7 +6,8 @@ const deleteFileIfExists = (relativePath) => {
     try {
         if (!relativePath) return;
 
-        const fullPath = path.join(process.cwd(), "public", relativePath);
+        const normalized = String(relativePath).replace(/^[/\\]+/, "");
+        const fullPath = path.join(__dirname, "../../public", normalized);
 
         if (fs.existsSync(fullPath)) {
             fs.unlinkSync(fullPath);

@@ -93,13 +93,13 @@
                 align-items    : center;
 
                 &.active {
-                    border     : 2px solid #1890ff;
-                    color      : #1890ff;
+                    border     : 2px solid #d70018;
+                    color      : #d70018;
                     font-weight: 500;
                 }
 
                 &:hover {
-                    border-color: #1890ff;
+                    border-color: #d70018;
                 }
 
                 .icon-circle {
@@ -148,7 +148,7 @@
                     opacity: 1;
 
                     img {
-                        border-color: #1890ff;
+                        border-color: #d70018;
                     }
                 }
 
@@ -249,14 +249,14 @@
         transition      : all 0.3s ease;
 
         &:hover {
-            border-color: #1890ff;
-            color       : #1890ff;
+            border-color: #d70018;
+            color       : #d70018;
         }
 
         &.active {
-            background-color: #1890ff;
+            background-color: #d70018;
             color           : white;
-            border-color    : #1890ff;
+            border-color    : #d70018;
             font-weight     : 500;
         }
     }

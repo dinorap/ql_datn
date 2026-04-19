@@ -79,7 +79,19 @@ const TableAdvertise = (props) => {
             title: () => <span onClick={() => requestSort('banner')}>Banner {sortConfig.key === 'banner' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</span>,
             dataIndex: 'banner',
             key: 'banner',
-            render: (banner) => <Tag color={banner === 1 ? 'green' : 'blue'}>{banner}</Tag>
+            render: (banner) => {
+                const colors = { 0: 'blue', 1: 'green', 2: 'orange', 3: 'purple', 4: 'magenta', 5: 'cyan' };
+                const labels = {
+                    0: '0 — Slider chính',
+                    1: '1 — Dải dưới',
+                    2: '2 — 3 ảnh nhỏ',
+                    3: '3 — Cột ĐT nổi bật',
+                    4: '4 — Cột Laptop nổi bật',
+                    5: '5 — Cột Tablet nổi bật',
+                };
+                const b = Number(banner);
+                return <Tag color={colors[b] || 'default'}>{labels[b] ?? banner}</Tag>;
+            }
         },
         {
             className: 'first',

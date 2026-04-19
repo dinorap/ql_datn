@@ -196,7 +196,7 @@
 
         &:hover {
             background  : #e6f4ff;
-            border-color: #1890ff;
+            border-color: #d70018;
         }
     }
 }
@@ -211,7 +211,7 @@
         margin-top : 8px;
         border     : none;
         background : none;
-        color      : #0071e3;
+        color      : #d70018;
         font-weight: 500;
         font-size  : 14.5px;
         display    : flex;
@@ -325,9 +325,9 @@
 
     .installment {
         background   : #fff;
-        border       : 1px solid #0c53b7;
+        border       : 1px solid #d70018;
         border-radius: 8px;
-        color        : #0c53b7;
+        color        : #d70018;
         font-size    : 11px;
         font-weight  : 500;
         padding      : 3px 5px;
@@ -341,9 +341,9 @@
 
     .installment-show {
         background   : #fff;
-        border       : 1px solid #0c53b7;
+        border       : 1px solid #d70018;
         border-radius: 8px;
-        color        : #0c53b7;
+        color        : #d70018;
         font-size    : 11px;
         font-weight  : 500;
         padding      : 3px 5px;
@@ -394,7 +394,7 @@
     }
 
     .discount {
-        color      : #e50000;
+        color      : #d70018;
         font-weight: bold;
         font-size  : 13px;
         margin-left: 5px;
@@ -407,7 +407,7 @@
     }
 
     .final-price {
-        color      : #e50000;
+        color      : #d70018;
         font-weight: bold;
         font-size  : 16px;
     }
@@ -614,7 +614,7 @@
     text-align   : center;
 
     &:hover {
-        border-color: #ff0000 !important;
+        border-color: #d70018 !important;
         color       : red !important;
     }
 }

@@ -12,9 +12,15 @@ const TypeCompanies = ({ typeId, selectedIds = [], onCompanySelect }) => {
             try {
                 setLoading(true);
                 const response = await getTypeCompanies(typeId);
-                setCompanies(response.data);
+                const companyData = Array.isArray(response?.data)
+                    ? response.data
+                    : Array.isArray(response?.data?.data)
+                        ? response.data.data
+                        : [];
+                setCompanies(companyData);
             } catch (err) {
                 setError(err.message);
+                setCompanies([]);
             } finally {
                 setLoading(false);
             }
@@ -31,7 +37,7 @@ const TypeCompanies = ({ typeId, selectedIds = [], onCompanySelect }) => {
 
     return (
         <div className="companyMenu d-flex flex-wrap justify-content-center">
-            {companies.map(company => {
+            {(Array.isArray(companies) ? companies : []).map(company => {
                 const isSelected = selectedIds.includes(company.id);
                 return (
                     <div

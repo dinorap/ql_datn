@@ -1,0 +1,56 @@
+.home-page-bg {
+    background-color: #f2f4f7;
+    min-height        : 100%;
+}
+
+/* Hàng hero trang chủ — căn khít kiểu CellphoneS (ảnh 2) */
+.home-hero-row {
+    max-width    : 1350px;
+    margin       : 6px auto 0;
+    padding      : 0 12px;
+    display      : flex;
+    gap          : 12px;
+    align-items  : stretch;
+    box-sizing   : border-box;
+}
+
+.home-hero-row__sidebar {
+    width          : 280px;
+    flex-shrink    : 0;
+    display        : flex;
+    flex-direction : column;
+    background     : #fff;
+    border-radius  : 12px;
+    box-shadow     : 0 1px 4px rgba(0, 0, 0, 0.06);
+    overflow       : hidden;
+
+    .category-menu {
+        flex      : 1 1 auto;
+        min-height: 100%;
+    }
+}
+
+.home-hero-row__main {
+    flex      : 1;
+    min-width : 0;
+    display   : flex;
+    flex-direction: column;
+}
+
+.home-banner-below {
+    max-width : 1350px;
+    margin    : 12px auto;
+    padding   : 0 12px;
+    box-sizing: border-box;
+
+    .banner,
+    .single-item {
+        border-radius: 10px;
+        overflow     : hidden;
+        box-shadow   : 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .banner-small {
+        border-radius: 10px;
+    }
+}

@@ -11,14 +11,12 @@ const instance = axios.create({
     withCredentials: true,
 });
 
-// Hàm lấy Access Token từ sessionStorage
+// Lấy access token: ưu tiên sessionStorage, fallback localStorage (hỗ trợ tab mới)
 const getAccessToken = () => {
-    return sessionStorage.getItem('access_token');
+    return sessionStorage.getItem('access_token') || localStorage.getItem('access_token');
 };
-
-// Hàm lấy Refresh Token từ sessionStorage
 const getRefreshToken = () => {
-    return sessionStorage.getItem('refresh_token');
+    return sessionStorage.getItem('refresh_token') || localStorage.getItem('refresh_token');
 };
 
 // Thêm Access Token vào header của request
@@ -47,7 +45,10 @@ instance.interceptors.request.use(
 const LogOut = async () => {
     toast.error("Token đã hết hạn hãy đăng nhập lại");
     await postLogOut();
-    sessionStorage.clear();
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     delete instance.defaults.headers.common['Authorization'];
     window.location.href = '/login';
 };
@@ -67,42 +68,45 @@ instance.interceptors.response.use(
     async (error) => {
         nProgress.done();
         const originalRequest = error.config;
+        const requestUrl = originalRequest?.url || "";
+        const isCartRequest = requestUrl.includes("/view/cart") || requestUrl.includes("/view/cartcount");
 
         // Kiểm tra lỗi 401 (token hết hạn)
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
-                const refreshToken = getRefreshToken();
-                if (refreshToken) {
-                    const response = await postRefeshToken();
-                    const { EC, access_token, EM } = response || {};
+                // Refresh token được backend set qua cookie (withCredentials: true),
+                // nên không phụ thuộc sessionStorage giữa các tab.
+                const response = await postRefeshToken(getRefreshToken());
+                const { EC, access_token, EM } = response || {};
 
-                    if (EC === 0 && access_token) {
-                        console.log("Làm mới Access Token thành công!");
+                if (EC === 0 && access_token) {
+                    console.log("Làm mới Access Token thành công!");
 
-                        // Cập nhật token mới vào sessionStorage
-                        sessionStorage.setItem('access_token', access_token);
+                    // Cập nhật token mới cho cả tab hiện tại và tab mới
+                    sessionStorage.setItem('access_token', access_token);
+                    localStorage.setItem('access_token', access_token);
 
-                        // Cập nhật header cho request hiện tại
-                        originalRequest.headers["Authorization"] = `Bearer ${access_token}`;
+                    // Cập nhật header cho request hiện tại
+                    originalRequest.headers["Authorization"] = `Bearer ${access_token}`;
 
-                        return instance(originalRequest);
-                    } else {
-                        console.error("Lỗi làm mới token: ", EM || "Không có thông báo lỗi");
-                        await LogOut();
-                    }
+                    return instance(originalRequest);
                 } else {
+                    console.error("Lỗi làm mới token: ", EM || "Không có thông báo lỗi");
+                    if (isCartRequest) return Promise.reject(error);
                     await LogOut();
                 }
             } catch (refreshError) {
                 console.error("Làm mới token thất bại", refreshError);
+                if (isCartRequest) return Promise.reject(error);
                 await LogOut();
             }
         }
 
         // Xử lý lỗi 403
         if (error.response?.status === 403 && !originalRequest._retry) {
+            if (isCartRequest) return Promise.reject(error);
             await LogOut();
         }
 

@@ -96,7 +96,7 @@ const TableUsers = (props) => {
                         color = 'green';
                         break;
                     case 'staff':
-                        color = 'blue';
+                        color = '#d70018';
                         break;
                     case 'product_manager':
                         color = 'orange';

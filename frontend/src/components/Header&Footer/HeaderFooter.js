@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo, useCallback } from "react";
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
@@ -18,8 +18,7 @@ import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import logo from '../../assets/Logo/logo.png';
-import { FaShoppingCart, FaUser } from "react-icons/fa";
-import { FaSearch } from "react-icons/fa";
+import { FaShoppingCart, FaUser, FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useSelector } from 'react-redux';
 import { postLogOut } from "../../services/apiService";
 import Popover from 'react-bootstrap/Popover';
@@ -35,54 +34,311 @@ import { logout } from "../../redux/slices/userSlice";
 import { getAdvertise } from "../../services/apiAdvertise";
 import { getAllProductSpecifications, searchSuggestions } from "../../services/apiViewService";
 import { IoLogoYoutube } from "react-icons/io5";
-import { useLocation } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import '../../locales/i18n.js';
+
+/** Thứ tự menu cột trái */
+const CATEGORY_MENU_ITEMS = [
+    {
+        matchLabel: 'Điện thoại',
+        titleKey: 'menu_phone',
+        icon: 'https://cdn.tgdd.vn//content/icon-phone-96x96-2.png',
+    },
+    {
+        matchLabel: 'Laptop',
+        titleKey: 'menu_laptop',
+        icon: 'https://cdn.tgdd.vn//content/icon-laptop-96x96-1.png',
+    },
+    {
+        matchLabel: 'Máy tính bảng',
+        titleKey: 'menu_tablet',
+        icon: 'https://cdn.tgdd.vn//content/icon-tablet-96x96-1.png',
+    },
+    {
+        matchLabel: 'Phụ kiện',
+        titleKey: 'menu_accessories',
+        icon: 'https://cdn.tgdd.vn//content/icon-phu-kien-96x96-1.png',
+    },
+    {
+        matchLabel: 'Smartwatch',
+        titleKey: 'menu_smartwatch',
+        icon: 'https://cdn.tgdd.vn//content/icon-smartwatch-96x96-1.png',
+    },
+    {
+        matchLabel: 'Đồng hồ',
+        titleKey: 'menu_watch',
+        icon: 'https://cdn.tgdd.vn//content/watch-icon-96x96.png',
+    },
+    {
+        matchLabel: 'Máy cũ, Thu cũ',
+        titleKey: 'menu_old_tradein',
+        icon: 'https://cdn.tgdd.vn//content/icon-header-may-cu-30x30.png',
+    },
+    {
+        matchLabel: 'PC, Máy in',
+        titleKey: 'menu_pc_printer',
+        icon: 'https://cdn.tgdd.vn//content/icon-pc-96x96.png',
+    },
+    {
+        matchLabel: 'Dịch vụ',
+        titleKey: 'menu_services',
+        icon: 'https://cdn.tgdd.vn//content/icon-pc-96x96.png',
+    },
+];
+
+const slugifyCategoryLabel = (str) =>
+    str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '');
+
+/** Tách tiêu đề / dòng phụ từ tên banner (vd: "A | B" hoặc "A / B") */
+const splitBannerTabLines = (raw) => {
+    const s = raw?.trim() || '';
+    const delims = [' | ', ' / ', ' – ', ' — '];
+    for (const d of delims) {
+        const i = s.indexOf(d);
+        if (i !== -1) {
+            return {
+                title: s.slice(0, i).trim() || s,
+                hint: s.slice(i + d.length).trim() || 'Chi tiết',
+            };
+        }
+    }
+    return { title: s || 'Banner', hint: 'Xem chi tiết' };
+};
+
 const BannerSlider = () => {
-    const settings = {
-        dots: true,
-        arrows: true,
-        infinite: true,
-        slidesToShow: 1, 
-        speed: 500,
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 4000,
-    };
+    const sliderRef = useRef(null);
+    const tabsScrollRef = useRef(null);
+    const tabBtnRefs = useRef([]);
     const [banners, setBanner] = useState([]);
+    const [thumbBanners, setThumbBanners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [tabScrollPrev, setTabScrollPrev] = useState(false);
+    const [tabScrollNext, setTabScrollNext] = useState(false);
+
+    const slideCount = banners.length;
+
+    const refreshTabScrollArrows = useCallback(() => {
+        const el = tabsScrollRef.current;
+        if (!el) {
+            setTabScrollPrev(false);
+            setTabScrollNext(false);
+            return;
+        }
+        const max = el.scrollWidth - el.clientWidth;
+        if (max <= 4) {
+            setTabScrollPrev(false);
+            setTabScrollNext(false);
+            return;
+        }
+        setTabScrollPrev(el.scrollLeft > 4);
+        setTabScrollNext(el.scrollLeft < max - 4);
+    }, []);
+
+    const scrollTabsByArrow = useCallback(
+        (dir) => {
+            const el = tabsScrollRef.current;
+            if (!el) return;
+            const step = el.clientWidth;
+            el.scrollBy({ left: dir * step, behavior: 'smooth' });
+            window.setTimeout(refreshTabScrollArrows, 350);
+        },
+        [refreshTabScrollArrows]
+    );
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await getAdvertise(0);
-                setBanner(data.data);
+                const main = await getAdvertise(0);
+                if (main?.EC === 0 && Array.isArray(main.data)) {
+                    setBanner(main.data);
+                } else {
+                    setBanner([]);
+                }
+                const thumbs = await getAdvertise(2);
+                if (thumbs?.EC === 0 && Array.isArray(thumbs.data)) {
+                    setThumbBanners(thumbs.data);
+                } else {
+                    setThumbBanners([]);
+                }
             } catch (err) {
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, []);
-    if (loading) return <div></div>;
-    if (error) return <div></div>;
+
+    useLayoutEffect(() => {
+        refreshTabScrollArrows();
+    }, [banners, refreshTabScrollArrows]);
+
+    useEffect(() => {
+        const el = tabsScrollRef.current;
+        if (!el) return;
+        const onScroll = () => refreshTabScrollArrows();
+        el.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', refreshTabScrollArrows);
+        return () => {
+            el.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', refreshTabScrollArrows);
+        };
+    }, [banners.length, refreshTabScrollArrows]);
+
+    useEffect(() => {
+        const container = tabsScrollRef.current;
+        const tab = tabBtnRefs.current[activeIndex];
+        if (!container || !tab) {
+            const t0 = window.setTimeout(refreshTabScrollArrows, 0);
+            return () => window.clearTimeout(t0);
+        }
+        let didScroll = false;
+        // Chỉ cuộn trong thanh tab — không dùng scrollIntoView (nó cuộn cả window,
+        // kéo trang lên đầu khi user đang ở cuối trang mỗi lần autoplay đổi slide).
+        const cRect = container.getBoundingClientRect();
+        const tRect = tab.getBoundingClientRect();
+        const pad = 8;
+        const overflowLeft = tRect.left - cRect.left - pad;
+        const overflowRight = tRect.right - cRect.right + pad;
+        if (overflowLeft < 0) {
+            didScroll = true;
+            container.scrollBy({ left: overflowLeft, behavior: 'smooth' });
+        } else if (overflowRight > 0) {
+            didScroll = true;
+            container.scrollBy({ left: overflowRight, behavior: 'smooth' });
+        }
+        const delay = didScroll ? 400 : 0;
+        const t = window.setTimeout(refreshTabScrollArrows, delay);
+        return () => window.clearTimeout(t);
+    }, [activeIndex, refreshTabScrollArrows]);
+
+    const goToSlide = (idx) => {
+        const safe = Math.max(0, Math.min(idx, Math.max(0, slideCount - 1)));
+        setActiveIndex(safe);
+        sliderRef.current?.slickGoTo(safe);
+    };
+
+    const goToTab = (tabIdx) => {
+        goToSlide(Math.min(tabIdx, Math.max(0, slideCount - 1)));
+    };
+
+    const settings = useMemo(
+        () => ({
+            dots: true,
+            arrows: true,
+            infinite: slideCount > 1,
+            slidesToShow: 1,
+            speed: 500,
+            slidesToScroll: 1,
+            autoplay: slideCount > 1,
+            autoplaySpeed: 4000,
+            afterChange: (current) => setActiveIndex(current),
+        }),
+        [slideCount]
+    );
+
+    if (loading) return <div className="hero-banner-slider-wrap" />;
+    if (error) return <div className="hero-banner-slider-wrap" />;
+    if (!slideCount) return <div className="hero-banner-slider-wrap" />;
+
+    const baseUrl = process.env.REACT_APP_BASE_URL || '';
+    const thumbSlides = thumbBanners.slice(0, 3);
+
     return (
-        <div className="slider-container">
-            <Slider {...settings}>
-                {banners.map((imgSrc, index) => (
-                    <div className="slider-item" key={index}>
-                        <a href={imgSrc.link} target="_blank" rel="noopener noreferrer">
-                            <img
-                                src={`${process.env.REACT_APP_BASE_URL}${imgSrc.image}`}
-                                alt={`banner-${index}`}
-                                className="slider-img"
-                            />
-                        </a>
-                    </div>
-                ))}
-            </Slider>
+        <div className="hero-banner-slider-wrap">
+            <div className="hero-promo-tabs-strip">
+                <button
+                    type="button"
+                    className="hero-promo-tabs-arrow hero-promo-tabs-arrow--prev"
+                    aria-label="Cuộn tab sang trái"
+                    disabled={!tabScrollPrev}
+                    onClick={() => scrollTabsByArrow(-1)}
+                >
+                    <FaChevronLeft />
+                </button>
+                <div
+                    ref={tabsScrollRef}
+                    className="hero-promo-tabs"
+                    role="tablist"
+                    aria-label="Chọn banner"
+                >
+                    {banners.map((b, idx) => {
+                        const { title, hint } = splitBannerTabLines(b.name);
+                        return (
+                            <button
+                                key={b.id ?? idx}
+                                ref={(el) => {
+                                    tabBtnRefs.current[idx] = el;
+                                }}
+                                type="button"
+                                role="tab"
+                                aria-selected={activeIndex === idx}
+                                className={`hero-promo-tab${activeIndex === idx ? ' active' : ''}`}
+                                onClick={() => goToTab(idx)}
+                            >
+                                <div className="tab-title">{title}</div>
+                                <div className="tab-hint">{hint}</div>
+                            </button>
+                        );
+                    })}
+                </div>
+                <button
+                    type="button"
+                    className="hero-promo-tabs-arrow hero-promo-tabs-arrow--next"
+                    aria-label="Cuộn tab sang phải"
+                    disabled={!tabScrollNext}
+                    onClick={() => scrollTabsByArrow(1)}
+                >
+                    <FaChevronRight />
+                </button>
+            </div>
+            <div className="slider-container">
+                <Slider ref={sliderRef} {...settings}>
+                    {banners.map((imgSrc, index) => (
+                        <div className="slider-item" key={imgSrc.id ?? index}>
+                            <div className="hero-slide-frame">
+                                <a
+                                    href={imgSrc.link || '#'}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hero-slide-link"
+                                >
+                                    <img
+                                        src={`${baseUrl}${imgSrc.image}`}
+                                        alt={imgSrc.name || `banner-${index}`}
+                                        className="hero-slide-img"
+                                    />
+                                </a>
+                            </div>
+                        </div>
+                    ))}
+                </Slider>
+            </div>
+            {thumbSlides.length > 0 && (
+                <div className="hero-slider-thumbs" aria-hidden="true">
+                    {thumbSlides.map((b, idx) => (
+                        <div key={b.id ?? idx} className="hero-thumb-tile">
+                            <div className="hero-thumb-frame">
+                                <img
+                                    src={`${baseUrl}${b.image}`}
+                                    alt=""
+                                    loading="lazy"
+                                    className="hero-thumb-img"
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
@@ -419,7 +675,7 @@ const Header = () => {
                                                     position: 'absolute',
                                                     top: '-11px',
                                                     right: '-13px',
-                                                    background: '#d32f2f',
+                                                    background: '#d70018',
                                                     color: '#fff',
                                                     borderRadius: '50%',
                                                     minWidth: '20px',
@@ -456,7 +712,7 @@ const Header = () => {
                                                     position: 'absolute',
                                                     top: '-11px',
                                                     right: '-13px',
-                                                    background: '#d32f2f',
+                                                    background: '#d70018',
                                                     color: '#fff',
                                                     borderRadius: '50%',
                                                     minWidth: '20px',
@@ -491,7 +747,6 @@ const Header = () => {
 const Category = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const location = useLocation();
     const [filterAll, setFilterAll] = useState(null);
 
     useEffect(() => {
@@ -502,64 +757,28 @@ const Category = () => {
         fetchFilter();
     }, []);
 
-    const slugify = (str) =>
-        str
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/đ/g, "d").replace(/Đ/g, "D")
-            .toLowerCase()
-            .replace(/\s+/g, "-")
-            .replace(/[^\w\-]+/g, "");
-
     const handleNavClick = (label) => {
         if (!filterAll?.category) return;
 
         const matched = filterAll.category.find(
-            (cat) => slugify(cat.label) === slugify(label)
+            (cat) => slugifyCategoryLabel(cat.label) === slugifyCategoryLabel(label)
         );
 
         if (!matched) return;
 
         const category_id = matched.value;
-        const slug = slugify(label);
-
-        if (location.pathname === `/${slug}`) {
-            navigate(`sanpham/${slug}?category_id=${category_id}`);
-        } else {
-            navigate(`sanpham/${slug}?category_id=${category_id}`);
-        }
+        const slug = slugifyCategoryLabel(label);
+        navigate(`sanpham/${slug}?category_id=${category_id}`);
     };
 
     return (
         <div className="category-menu">
             <Nav className="main-menu">
-                <div className="nav-item" onClick={() => handleNavClick("Điện thoại")}>
-                    <img src="https://cdn.tgdd.vn//content/icon-phone-96x96-2.png" alt="" /> {t('menu_phone')}
-                </div>
-                <div className="nav-item" onClick={() => handleNavClick("Laptop")}>
-                    <img src="https://cdn.tgdd.vn//content/icon-laptop-96x96-1.png" alt="" /> {t('menu_laptop')}
-                </div>
-                <div className="nav-item" onClick={() => handleNavClick("Máy tính bảng")}>
-                    <img src="https://cdn.tgdd.vn//content/icon-tablet-96x96-1.png" alt="" /> {t('menu_tablet')}
-                </div>
-                <div className="nav-item" onClick={() => handleNavClick("")}>
-                    <img src="https://cdn.tgdd.vn//content/icon-phu-kien-96x96-1.png" alt="" /> {t('menu_accessories')}
-                </div>
-                <div className="nav-item" onClick={() => handleNavClick("Smartwatch")}>
-                    <img src="https://cdn.tgdd.vn//content/icon-smartwatch-96x96-1.png" alt="" /> {t('menu_smartwatch')}
-                </div>
-                <div className="nav-item" onClick={() => handleNavClick("Đồng hồ")}>
-                    <img src="https://cdn.tgdd.vn//content/watch-icon-96x96.png" alt="" /> {t('menu_watch')}
-                </div>
-                <div className="nav-item" onClick={() => handleNavClick("Máy cũ, Thu cũ")}>
-                    <img src="https://cdn.tgdd.vn//content/icon-header-may-cu-30x30.png" alt="" /> {t('menu_old_tradein')}
-                </div>
-                <div className="nav-item" onClick={() => handleNavClick("PC, Máy in")}>
-                    <img src="https://cdn.tgdd.vn//content/icon-pc-96x96.png" alt="" /> {t('menu_pc_printer')}
-                </div>
-                <div className="nav-item" onClick={() => handleNavClick("Dịch vụ")}>
-                    <img src="https://cdn.tgdd.vn//content/icon-pc-96x96.png" alt="" /> {t('menu_services')}
-                </div>
+                {CATEGORY_MENU_ITEMS.map((item) => (
+                    <div key={item.matchLabel} className="nav-item" onClick={() => handleNavClick(item.matchLabel)}>
+                        <img src={item.icon} alt="" /> {t(item.titleKey)}
+                    </div>
+                ))}
             </Nav>
         </div>
     );
@@ -811,11 +1030,11 @@ const Footer = () => {
                 <div className="container">
                     <div className="copy-right">
                         <p>
-                            <NavLink className="nav-link" to="/" >{t('copyright')} &nbsp;</NavLink> - All rights reserved © 2025 - Designed by&nbsp;
-                            <span style={{ color: "#eee", fontWeight: "bold" }}>Đinh Minh Phương</span>
+                            <NavLink className="nav-link" to="/" >{t('copyright')} &nbsp;</NavLink> - All rights reserved © 2026 - Designed by&nbsp;
+                            <span style={{ color: "#eee", fontWeight: "bold" }}>Nguyễn Quang Linh</span>
                         </p>
                     </div>
-                    <p>{t("phone-num")}: 012 3456 789. Email: 21010604@st.phenikaa-uni.edu.vn.</p>
+                    <p>{t("phone-num")}: 012 3456 789. Email: abc@st.phenikaa-uni.edu.vn.</p>
                 </div>
             </div>
         </footer>

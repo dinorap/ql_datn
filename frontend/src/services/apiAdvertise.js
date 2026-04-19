@@ -40,8 +40,10 @@ const postCreateNewAdvertise = (name, link, image, banner) => {
     const data = new FormData();
     data.append('name', name);
     data.append('link', link);
-    data.append('image', image);
-    data.append('banner', banner);
+    if (image instanceof Blob) {
+        data.append('image', image);
+    }
+    data.append('banner', String(banner));
 
     return axios.post('api/advertise', data);
 }

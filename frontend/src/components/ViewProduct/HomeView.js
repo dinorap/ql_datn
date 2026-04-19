@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Slider from 'react-slick';
 import { Rate, Tag } from 'antd';
 import { getFlashSaleProducts, getSimilarProducts, getSuggestCart, getTopProductsByCategory, postSuggestCart } from '../../services/apiViewService';
+import { getAdvertise } from '../../services/apiAdvertise';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import './HomeView.scss'
@@ -36,84 +37,89 @@ const FlashSaleSlider = () => {
     return (
         products && (
 
-            < div className="flash-sale-section" >
-                < div className="flash-sale-header" >
-                    <img src="https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/hot-sale-cuoi-tuan-20-03-2024.gif" alt="title" style={{ height: "60px" }} />
-                </div >
-                <Slider {...settings}>
-                    {products.map((product) => (
-                        <div key={product.product_id} className="flash-sale-item">
-                            {product.is_active === 0 && (
-                                <div className="overlay-disabled-1">
-                                    <div className="overlay-disabled">
-                                        <p>Ngừng bán</p></div>
-                                </div>
-                            )}
-                            <div className="discount-badge"><p className='promotion-name'>{product.promotion.promotion_type_name}</p></div>
-                            {product.is_installment_available === 1 ? <div className="installment">Trả góp 0%</div> : ""}
+            < div className="flash-sale-section weekend-sale" >
+                <div className="weekend-sale-shell">
+                    < div className="flash-sale-header" >
+                        <img src="/Banner_deal.webp" alt="Hot sale cuối tuần" />
+                    </div >
+                    <div className="flash-sale-frame">
+                        <Slider {...settings}>
+                        {products.map((product) => (
+                            <div key={product.product_id} className="flash-sale-item">
+                                {product.is_active === 0 && (
+                                    <div className="overlay-disabled-1">
+                                        <div className="overlay-disabled">
+                                            <p>Ngừng bán</p></div>
+                                    </div>
+                                )}
+                                <div className="discount-badge"><p className='promotion-name'>{product.promotion.promotion_type_name}</p></div>
+                                {product.is_installment_available === 1 ? <div className="installment">Trả góp 0%</div> : ""}
 
-                            <div className="flash-sale-card">
-                                <div className="flash-sale-image" onClick={() => navigate(`/products/${product.product_id}`)} >
-                                    {
-                                        product.image ? (
-                                            <img src={`${process.env.REACT_APP_BASE_URL}${product.image}`} alt={product.product_name} />
-                                        ) : (
-                                            <div className="no-image">No Image</div>
-                                        )
-                                    }
+                                <div className="flash-sale-card">
+                                    <div className="flash-sale-image" onClick={() => navigate(`/products/${product.product_id}`)} >
+                                        {
+                                            product.image ? (
+                                                <img src={`${process.env.REACT_APP_BASE_URL}${product.image}`} alt={product.product_name} />
+                                            ) : (
+                                                <div className="no-image">No Image</div>
+                                            )
+                                        }
 
-                                </div>
-                                <div className="flash-sale-content">
-                                    <h3 className="product-name" onClick={() => navigate(`/products/${product.product_id}`)}>{product.product_name}</h3>
-                                    {product.ram && product.rom && (
-                                        <Tag className='option-tag'>{product.ram} / {product.rom}</Tag>
-                                    )}
-                                    {product.screen && (
-                                        <Tag className='option-tag'>{product.screen}"</Tag>
-                                    )}
-                                    {product.refresh_rate && (
-                                        <Tag className='option-tag'>{product.refresh_rate}</Tag>
-                                    )}
-                                    <div className="price-section">
-                                        {product.promotion.promotion_code === 'custom_price' ? (
-                                            <>
-                                                <p className="final-price">{product.final_price.toLocaleString()}₫ - Giá HOT</p>
-                                                <span className="base-price">{product.base_price.toLocaleString()}₫</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <p className="final-price">{product.final_price.toLocaleString()}₫</p>
-                                                <div>
-                                                    <span className="base-price">{product.base_price.toLocaleString()}₫</span>
-                                                    <span className="discount">
-                                                        - {product.promotion.discount_value.toLocaleString()}
-                                                        {product.promotion.promotion_code === 'fixed_amount' ? '₫' : '%'}
-                                                    </span>
-                                                </div>
-                                            </>
+                                    </div>
+                                    <div className="flash-sale-content">
+                                        <h3 className="product-name" onClick={() => navigate(`/products/${product.product_id}`)}>{product.product_name}</h3>
+                                        {product.ram && product.rom && (
+                                            <Tag className='option-tag'>{product.ram} / {product.rom}</Tag>
                                         )}
+                                        {product.screen && (
+                                            <Tag className='option-tag'>{product.screen}"</Tag>
+                                        )}
+                                        {product.refresh_rate && (
+                                            <Tag className='option-tag'>{product.refresh_rate}</Tag>
+                                        )}
+                                        <div className="price-section">
+                                            {product.promotion.promotion_code === 'custom_price' ? (
+                                                <>
+                                                    <p className="final-price">{product.final_price.toLocaleString()}₫ - Giá HOT</p>
+                                                    <span className="base-price">{product.base_price.toLocaleString()}₫</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <p className="final-price">{product.final_price.toLocaleString()}₫</p>
+                                                    <div>
+                                                        <span className="base-price">{product.base_price.toLocaleString()}₫</span>
+                                                        <span className="discount">
+                                                            - {product.promotion.discount_value.toLocaleString()}
+                                                            {product.promotion.promotion_code === 'fixed_amount' ? '₫' : '%'}
+                                                        </span>
+                                                    </div>
+                                                </>
+                                            )}
+
+                                        </div>
+                                        <div className="rating-section">
+                                            <Rate disabled defaultValue={product.average_rating} className="rating" />
+                                            <span className="reviews">{product.total_reviews} đánh giá</span>
+                                        </div>
+                                        <div className="description">
+                                            <p className="description-p">{product.description}</p>
+                                        </div>
 
                                     </div>
-                                    <div className="rating-section">
-                                        <Rate disabled defaultValue={product.average_rating} className="rating" />
-                                        <span className="reviews">{product.total_reviews} đánh giá</span>
-                                    </div>
-                                    <div className="description">
-                                        <p className="description-p">{product.description}</p>
-                                    </div>
-
                                 </div>
                             </div>
-                        </div>
-                    ))
-                    }
-                </Slider >
+                        ))
+                        }
+                        </Slider >
+                    </div>
+                </div>
             </div >)
     );
 };
 
-const TopProductSection = ({ categoryId, title, background, link }) => {
+const TopProductSection = ({ categoryId, title, background, link, sideBannerType }) => {
     const [products, setProducts] = useState([]);
+    const [sideAd, setSideAd] = useState(null);
     const navigate = useNavigate();
     useEffect(() => {
         const fetchProducts = async () => {
@@ -124,12 +130,49 @@ const TopProductSection = ({ categoryId, title, background, link }) => {
         };
         fetchProducts();
     }, [categoryId]);
+
+    useEffect(() => {
+        const bannerType = Number(sideBannerType);
+        if (!Number.isFinite(bannerType) || bannerType < 0) {
+            setSideAd(null);
+            return;
+        }
+        let cancelled = false;
+        (async () => {
+            const res = await getAdvertise(bannerType);
+            if (cancelled) return;
+            const first = res?.EC === 0 && Array.isArray(res.data) ? res.data[0] : null;
+            setSideAd(first?.image ? first : null);
+        })();
+        return () => { cancelled = true; };
+    }, [sideBannerType]);
+
     const link_k = link + "?category_id=" + categoryId;
+    const hasSideBanner = Boolean(sideAd?.image);
+    const sideHref = sideAd?.link && sideAd.link !== '#' ? sideAd.link : null;
+    const sideIsExternal = sideHref && /^https?:\/\//i.test(sideHref);
+
     return (
         <div className='home'>
-            <div className="top-item-section">
+            <div className={`top-item-section${hasSideBanner ? ' top-item-section--with-side' : ''}`}>
                 <div className={`title-top-item ${background}`}>{title}</div>
-                <div className='list-top-item'>
+                <div className="top-item-body">
+                    {hasSideBanner && (
+                        <a
+                            className="top-item-side-banner"
+                            href={sideHref || '#'}
+                            onClick={(e) => {
+                                if (!sideHref) e.preventDefault();
+                            }}
+                            {...(sideIsExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        >
+                            <img
+                                src={`${process.env.REACT_APP_BASE_URL}${sideAd.image}`}
+                                alt={sideAd.name || 'Quảng cáo'}
+                            />
+                        </a>
+                    )}
+                    <div className='list-top-item'>
                     {products.map((product) => (
                         <div key={product.product_id} className="flash-sale-item top ">
                             {product.is_active === 0 && (
@@ -198,6 +241,7 @@ const TopProductSection = ({ categoryId, title, background, link }) => {
                             </div>
                         </div>
                     ))}
+                    </div>
                 </div>
                 <div className="see-more">
                     <Link to={link_k}>Xem thêm {title.toLowerCase()} <IoIosArrowDown />  </Link>

@@ -1,6 +1,17 @@
+const fs = require('fs');
 const connection = require('../config/database')
 const createUpload = require("../middleware/upload_image")
 const deleteFileIfExists = require('../middleware/deleteFileIfExists');
+
+const unlinkUploadedFile = (file) => {
+    if (file?.path && fs.existsSync(file.path)) {
+        try {
+            fs.unlinkSync(file.path);
+        } catch (e) {
+            console.error('unlinkUploadedFile:', e);
+        }
+    }
+};
 
 const getCompanies = async (req, res) => {
     try {
@@ -72,7 +83,8 @@ const getAdvertise = async (req, res) => {
         const banner = req.params.banner;
 
         const [advertise] = await connection.query(
-            `SELECT * FROM advertise WHERE banner = ?`, [banner]
+            `SELECT * FROM advertise WHERE banner = ? ORDER BY id ASC`,
+            [banner]
         );
 
         if (!advertise || advertise.length === 0) {
@@ -185,9 +197,15 @@ const createAdvertise = async (req, res) => {
             }
 
             const { name, link, banner } = req.body;
-            const imagePath = req.file ? `/uploads/advertise/${req.file.filename}` : null;
+
+            if (!req.file) {
+                return res.json({ EC: 1, EM: "Vui lòng chọn ảnh cho banner!" });
+            }
+
+            const imagePath = `/uploads/advertise/${req.file.filename}`;
 
             if (!name || !link) {
+                unlinkUploadedFile(req.file);
                 return res.json({ EC: 1, EM: "Thiếu thông tin bắt buộc!" });
             }
 
@@ -197,19 +215,26 @@ const createAdvertise = async (req, res) => {
             );
 
             if (existingAdvertise.length > 0) {
+                unlinkUploadedFile(req.file);
                 return res.json({ EC: 1, EM: "Tên quảng cáo đã được sử dụng!" });
             }
 
-            const [result] = await connection.query(
-                `INSERT INTO advertise (name, link, image, banner) VALUES (?, ?, ?, ?)`,
-                [name, link, imagePath, banner || 0]
-            );
+            try {
+                const [result] = await connection.query(
+                    `INSERT INTO advertise (name, link, image, banner) VALUES (?, ?, ?, ?)`,
+                    [name, link, imagePath, banner !== undefined && banner !== '' ? banner : 0]
+                );
 
-            return res.json({
-                EC: 0,
-                EM: "Tạo banner quảng cáo thành công!",
-                data: { id: result.insertId }
-            });
+                return res.json({
+                    EC: 0,
+                    EM: "Tạo banner quảng cáo thành công!",
+                    data: { id: result.insertId }
+                });
+            } catch (dbErr) {
+                unlinkUploadedFile(req.file);
+                console.error(dbErr);
+                return res.json({ EC: 2, EM: "Lỗi server!" });
+            }
         });
     } catch (error) {
         console.error(error);
@@ -230,6 +255,7 @@ const updateAdvertise = async (req, res) => {
             const { name, link, banner, removeAvatar } = req.body;
 
             if (!name) {
+                unlinkUploadedFile(req.file);
                 return res.json({ EC: 1, EM: "Thiếu thông tin bắt buộc!" });
             }
 
@@ -239,6 +265,7 @@ const updateAdvertise = async (req, res) => {
             );
 
             if (existingAdvertise.length === 0) {
+                unlinkUploadedFile(req.file);
                 return res.json({ EC: 1, EM: "Banner không tồn tại!" });
             }
 

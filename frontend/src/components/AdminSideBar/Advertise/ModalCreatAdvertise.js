@@ -12,7 +12,7 @@ const ModalCreateAdvertise = (props) => {
         setName("")
         setShow(false)
         setLink("")
-        setBanner(0)
+        setBanner('0')
         setImage("")
         setPreviewImage("")
     };
@@ -20,7 +20,7 @@ const ModalCreateAdvertise = (props) => {
     const [name, setName] = useState("");
     const [link, setLink] = useState("");
     const [image, setImage] = useState("");
-    const [banner, setBanner] = useState(0);
+    const [banner, setBanner] = useState('0');
     const [previewImage, setPreviewImage] = useState("");
 
     const handleUploadImage = (event) => {
@@ -31,8 +31,16 @@ const ModalCreateAdvertise = (props) => {
     }
 
     const handleSubmitCreateAdvertise = async () => {
+        if (!image || !(image instanceof File)) {
+            toast.warning('Vui lòng chọn ảnh cho banner!');
+            return;
+        }
+        if (!name?.trim() || !link?.trim()) {
+            toast.warning('Nhập đủ tên và link.');
+            return;
+        }
 
-        let data = await postCreateNewAdvertise(name, link, image, banner)
+        let data = await postCreateNewAdvertise(name.trim(), link.trim(), image, Number(banner))
 
 
         if (data && data.EC === 0) {
@@ -64,12 +72,23 @@ const ModalCreateAdvertise = (props) => {
                                 value={link} onChange={(event) => setLink(event.target.value)} />
                         </div>
 
-                        <div className="col-md-4">
-                            <label className="form-label">Banner</label>
-                            <select className="form-select" onChange={(event) => setBanner(event.target.value)}>
-                                <option value="0">0</option>
-                                <option value="1">1</option>
+                        <div className="col-md-6">
+                            <label className="form-label">Loại banner</label>
+                            <select
+                                className="form-select"
+                                value={banner}
+                                onChange={(event) => setBanner(event.target.value)}
+                            >
+                                <option value="0">0 — Slider lớn (trang chủ)</option>
+                                <option value="1">1 — Dải banner dưới slider</option>
+                                <option value="2">2 — 3 ảnh nhỏ dưới slider (tối đa 3 mục)</option>
+                                <option value="3">3 — Cột dọc cạnh “Điện thoại nổi bật” (1 ảnh đầu)</option>
+                                <option value="4">4 — Cột dọc cạnh “Laptop nổi bật” (1 ảnh đầu)</option>
+                                <option value="5">5 — Cột dọc cạnh “Tablet nổi bật” (1 ảnh đầu)</option>
                             </select>
+                            <div className="form-text text-muted small mt-1">
+                                Loại 2: tối đa 3 ảnh đầu; loại 3–5: mỗi loại một ảnh dọc bên trái block tương ứng trên trang chủ; link có thể <code>#</code>.
+                            </div>
                         </div>
 
                         <div className="col-md-12">

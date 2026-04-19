@@ -23,6 +23,11 @@ import { MdLaptopMac } from "react-icons/md";
 import { FaTabletScreenButton } from "react-icons/fa6";
 import { GiUsbKey } from "react-icons/gi";
 import { FaVideo } from "react-icons/fa";
+import { GiWatch } from "react-icons/gi";
+import { FaRegClock } from "react-icons/fa";
+import { FaDesktop } from "react-icons/fa";
+import { MdMiscellaneousServices } from "react-icons/md";
+import { RiSmartphoneLine } from "react-icons/ri";
 
 import { FaNewspaper } from "react-icons/fa6";
 
@@ -46,7 +51,12 @@ const SideBar = () => {
                 { icon: <IoPhonePortrait />, label: 'Điện thoại' },
                 { icon: <MdLaptopMac />, label: 'Laptop' },
                 { icon: <FaTabletScreenButton />, label: 'Máy Tính Bảng' },
-                { icon: <GiUsbKey />, label: 'Phụ kiện' }
+                { icon: <GiUsbKey />, label: 'Phụ kiện' },
+                { icon: <GiWatch />, label: 'Smartwatch' },
+                { icon: <FaRegClock />, label: 'Đồng hồ' },
+                { icon: <RiSmartphoneLine />, label: 'Máy cũ, Thu cũ' },
+                { icon: <FaDesktop />, label: 'PC, Máy in' },
+                { icon: <MdMiscellaneousServices />, label: 'Dịch vụ' }
             ]
         },
         { icon: <FaShoppingCart />, label: 'Đơn hàng' },
@@ -123,6 +133,8 @@ const SideBar = () => {
 
         if (routeMap[item.label]) {
             navigate(routeMap[item.label]);
+        } else if (!item.hasSubMenu && item.label !== "Đăng xuất") {
+            toast.info("Danh mục này đang được cập nhật.");
         }
     };
 
@@ -142,7 +154,7 @@ const SideBar = () => {
 
             {!collapsed ? (
                 <div className="logo">
-                    <h2>Tech Wolrd</h2>
+                    <h2>Tech World Pro</h2>
                     <p>ADMIN management</p>
                 </div>
             ) : (

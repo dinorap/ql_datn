@@ -87,6 +87,18 @@ const CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 const RETURN_URL = process.env.PAYPAL_RETURN_URL;
 const CANCEL_URL = process.env.PAYPAL_CANCEL_URL;
+const PAYPAL_VND_TO_USD_RATE = Number(process.env.PAYPAL_VND_TO_USD_RATE || 25000);
+
+const convertVndToUsd = (vndAmount) => {
+    if (!Number.isFinite(vndAmount) || vndAmount <= 0) {
+        return null;
+    }
+    const usdRaw = vndAmount / PAYPAL_VND_TO_USD_RATE;
+    const usdRounded = Math.round(usdRaw * 100) / 100;
+    // PayPal cần chuỗi decimal, tối đa 2 chữ số thập phân.
+    return usdRounded.toFixed(2);
+};
+
 const getAccessToken = async () => {
     const res = await axios({
         method: "post",
@@ -103,7 +115,15 @@ const getAccessToken = async () => {
 };
 const createPaypalPayment = async (req, res) => {
     try {
-        const amount = Number(req.body.amount);
+        const amountVnd = Number(req.body.amount);
+        const amountUsd = convertVndToUsd(amountVnd);
+        if (!amountUsd) {
+            return res.status(400).json({
+                EC: 1,
+                EM: "Số tiền thanh toán PayPal không hợp lệ",
+            });
+        }
+
         const token = await getAccessToken();
 
         const response = await axios.post(
@@ -113,7 +133,7 @@ const createPaypalPayment = async (req, res) => {
                 purchase_units: [{
                     amount: {
                         currency_code: "USD",
-                        value: amount,
+                        value: amountUsd,
                     },
                 }],
                 application_context: {

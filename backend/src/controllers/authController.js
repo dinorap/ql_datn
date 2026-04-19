@@ -104,6 +104,7 @@ const loginUser = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Strict",
+            path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -141,7 +142,12 @@ const logoutUser = async (req, res) => {
             await connection.query(`UPDATE users SET refresh_token = NULL WHERE refresh_token = ?`, [refreshToken]);
         }
 
-        res.clearCookie("refreshToken");
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+            path: "/"
+        });
         return res.json({ EC: 0, EM: "Đăng xuất thành công!" });
 
     } catch (error) {
@@ -216,7 +222,7 @@ const resetPassword = async (req, res) => {
 
 const refreshToken = async (req, res) => {
     try {
-        const { refreshToken } = req.cookies;
+        const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
         if (!refreshToken) {
             return res.json({ EC: 1, EM: "Không tìm thấy Refresh Token!" });
         }

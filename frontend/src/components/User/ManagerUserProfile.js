@@ -64,26 +64,23 @@ const ManagerUserProfile = () => {
     };
 
     return (
-        <div className="bg-light">
-            <div className="container py-4">
-                <div className="row">
-
-                    <div className="col-12 mb-4">
-                        <div className="profile-header position-relative">
-                            <div className="position-absolute top-0 end-0 p-3"></div>
-                        </div>
-                        <div className="text-center">
-                            <div className="position-relative d-inline-block">
+        <div className="account-page">
+            <div className="container-fluid account-container py-4">
+                <div className="account-layout">
+                    <aside className="account-sidebar">
+                        <div className="account-sidebar__head">
+                            <div className="account-avatar-wrap">
                                 <img
                                     src={previewAvatar || account.avatar || defaultAvatar}
-                                    className="rounded-circle profile-pic"
+                                    className="account-avatar"
                                     alt="Profile"
                                 />
                                 {isProfilePage && (
                                     <>
                                         <button
-                                            className="btn btn-primary btn-sm position-absolute bottom-0 end-0 rounded-circle"
+                                            className="account-avatar-edit"
                                             onClick={handleAvatarClick}
+                                            type="button"
                                         >
                                             <FaCamera />
                                         </button>
@@ -97,48 +94,33 @@ const ManagerUserProfile = () => {
                                     </>
                                 )}
                             </div>
-                            <h3 className="mt-3 mb-1" style={{ fontSize: '20px' }}>{account.username}</h3>
+                            <h3 className="account-name">{account.username}</h3>
+                            <p className="account-email">{account.email}</p>
                         </div>
-                    </div>
 
+                        <nav className="account-nav nav nav-pills">
+                            <NavLink
+                                className={({ isActive }) => "nav-link" + (isActive && location.pathname === "/thongtin" ? " active" : "")}
+                                to="/thongtin"
+                                end
+                            >
+                                <ImProfile className='mx-2 top' />Thông tin cá nhân
+                            </NavLink>
+                            <NavLink
+                                className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
+                                to="/thongtin/lichsu"
+                            >
+                                <LuHistory className='mx-2 top' />Lịch sử đơn hàng
+                            </NavLink>
+                            <NavLink className="nav-link" to="/thongbao">
+                                <IoMdNotifications className='mx-2 top' />Thông báo
+                            </NavLink>
+                        </nav>
+                    </aside>
 
-                    <div className="col-12">
-                        <div className="card border-0">
-                            <div className="card-body p-0">
-                                <div className="flex-box">
-
-                                    <div className="col-lg-3 his-left">
-                                        <div className="p-4">
-                                            <div className="nav  nav-pills">
-                                                <NavLink
-                                                    className={({ isActive }) => "nav-link" + (isActive && location.pathname === "/thongtin" ? " active" : "")}
-                                                    to="/thongtin"
-                                                    end
-                                                >
-                                                    <ImProfile className='mx-2 top' />Thông tin cá nhân
-                                                </NavLink>
-                                                <NavLink
-                                                    className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
-                                                    to="/thongtin/lichsu"
-                                                >
-                                                    <LuHistory className='mx-2 top' />Lịch sử đơn hàng
-                                                </NavLink>
-                                                <NavLink className="nav-link" to="/thongbao">
-                                                    <IoMdNotifications className='mx-2 top' />Thông báo
-                                                </NavLink>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div className="col-lg-9 p-4 his-right">
-                                        <Outlet />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                    <section className="account-content">
+                        <Outlet />
+                    </section>
                 </div>
             </div>
         </div>

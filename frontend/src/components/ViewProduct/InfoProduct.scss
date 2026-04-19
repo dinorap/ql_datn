@@ -88,14 +88,14 @@
         }
 
         .count {
-            color        : #1677ff;
+            color        : #d70018;
             cursor       : pointer;
             border-right : 0.1px solid rgb(216, 216, 216);
             padding-right: 10px;
         }
 
         .specifications {
-            color      : #1677ff;
+            color      : #d70018;
             cursor     : pointer;
             margin-left: 10px;
         }
@@ -153,14 +153,14 @@
         transition      : all 0.3s ease;
 
         &:hover {
-            border-color: #1890ff;
-            color       : #1890ff;
+            border-color: #d70018;
+            color       : #d70018;
         }
 
         &.active {
-            background-color: #1890ff;
+            background-color: #d70018;
             color           : white;
-            border-color    : #1890ff;
+            border-color    : #d70018;
             font-weight     : 500;
         }
     }
@@ -308,8 +308,8 @@
 
 .button.out-of-stock-msg {
     background     : #ffffff;
-    color          : #ff0000;
-    border         : 1px solid #ffbdbd;
+    color          : #d70018;
+    border         : 1px solid rgba(215, 0, 24, 0.25);
     border-radius  : 8px;
     padding        : 18px 0;
     font-size      : 1.2rem;

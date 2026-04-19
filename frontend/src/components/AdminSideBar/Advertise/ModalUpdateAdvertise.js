@@ -14,7 +14,7 @@ const ModalUpdateAdvertise = (props) => {
         setName("")
         setLink("")
 
-        setBanner(0)
+        setBanner('0')
         setImage("")
         setPreviewImage("")
         props.resetUpdateData()
@@ -23,7 +23,7 @@ const ModalUpdateAdvertise = (props) => {
         if (dataUpdate && Object.keys(dataUpdate).length > 0) {
             setName(dataUpdate.name);
             setLink(dataUpdate.link);
-            setBanner(dataUpdate.banner);
+            setBanner(String(dataUpdate.banner ?? 0));
 
             if (dataUpdate.image) {
 
@@ -37,7 +37,7 @@ const ModalUpdateAdvertise = (props) => {
     const [name, setName] = useState("");
     const [link, setLink] = useState("");
     const [image, setImage] = useState("");
-    const [banner, setBanner] = useState(0);
+    const [banner, setBanner] = useState('0');
     const [previewImage, setPreviewImage] = useState("");
     const [isRemoveAvatar, setIsRemoveAvatar] = useState(false);
     const handleUploadImage = (event) => {
@@ -47,7 +47,7 @@ const ModalUpdateAdvertise = (props) => {
         }
     }
     const handleSubmitUpdateAdvertise = async () => {
-        let data = await putUpdateAdvertise(dataUpdate.id, name, link, image, banner, isRemoveAvatar)
+        let data = await putUpdateAdvertise(dataUpdate.id, name, link, image, Number(banner), isRemoveAvatar)
         if (data && data.EC === 0) {
             toast.success(data.EM);
             handleClose();
@@ -76,12 +76,23 @@ const ModalUpdateAdvertise = (props) => {
                                 value={link} onChange={(event) => setLink(event.target.value)} />
                         </div>
 
-                        <div className="col-md-4">
-                            <label className="form-label">Banner</label>
-                            <select className="form-select" value={banner} onChange={(event) => setBanner(event.target.value)}>
-                                <option value="0">0</option>
-                                <option value="1">1</option>
+                        <div className="col-md-6">
+                            <label className="form-label">Loại banner</label>
+                            <select
+                                className="form-select"
+                                value={banner}
+                                onChange={(event) => setBanner(event.target.value)}
+                            >
+                                <option value="0">0 — Slider lớn (trang chủ)</option>
+                                <option value="1">1 — Dải banner dưới slider</option>
+                                <option value="2">2 — 3 ảnh nhỏ dưới slider (tối đa 3 mục)</option>
+                                <option value="3">3 — Cột dọc cạnh “Điện thoại nổi bật” (1 ảnh đầu)</option>
+                                <option value="4">4 — Cột dọc cạnh “Laptop nổi bật” (1 ảnh đầu)</option>
+                                <option value="5">5 — Cột dọc cạnh “Tablet nổi bật” (1 ảnh đầu)</option>
                             </select>
+                            <div className="form-text text-muted small mt-1">
+                                Loại 2: tối đa 3 ảnh đầu; loại 3–5: cột quảng cáo trái từng block nổi bật trên trang chủ.
+                            </div>
                         </div>
 
                         <div className="col-md-12 d-flex gap-3 align-items-center">

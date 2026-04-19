@@ -11,6 +11,13 @@ const { getAllPromotionTypesWithPaginate, createPromotionType, updatePromotionTy
 const { updateUserProfile, updateUserPassword } = require("../controllers/ProfileController");
 const { updateOrderStatus, getAllOrders } = require("../controllers/OrderController");
 const { getTopSellingProducts, getDailyRevenue, getRevenueByCategory } = require("../controllers/StatisticsController");
+const {
+  getUserAddresses,
+  createAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
+} = require("../controllers/UserAddressController");
 
 const router = express.Router();
 
@@ -38,6 +45,11 @@ router.get('/promotion', getAllPromotionType)
 // Protected APIs - Cần xác thực (Access Token)
 router.put('/user/profile', authMiddleware, updateUserProfile);
 router.put('/user/password', authMiddleware, updateUserPassword);
+router.get('/user-address/:user_id', authMiddleware, getUserAddresses);
+router.post('/user-address', authMiddleware, createAddress);
+router.put('/user-address/:id', authMiddleware, updateAddress);
+router.delete('/user-address/:id', authMiddleware, deleteAddress);
+router.patch('/user-address/:id/default', authMiddleware, setDefaultAddress);
 
 // Admin APIs - Cần xác thực + quyền admin
 router.get('/admin/all', authMiddleware, getAllUsers)

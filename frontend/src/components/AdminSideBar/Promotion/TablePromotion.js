@@ -80,7 +80,7 @@ const TablePromotion = (props) => {
             title: () => <span onClick={() => requestSort('code')}>Mã {sortConfig.key === 'code' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</span>,
             dataIndex: 'code',
             key: 'code',
-            render: (code) => <Tag color="blue">{code}</Tag>
+            render: (code) => <Tag color="#d70018">{code}</Tag>
         },
         {
             className: 'first',

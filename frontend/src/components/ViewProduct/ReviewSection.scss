@@ -21,7 +21,7 @@
             font-size    : 56px;
             font-weight  : bold;
             margin-bottom: 2px;
-            color        : #f53d2d;
+            color        : #d70018;
             text-shadow  : 0 2px 8px #ffe2e2;
         }
 
@@ -37,7 +37,7 @@
 
         .rate-button {
             margin-top   : 12px;
-            background   : linear-gradient(90deg, #f53d2d 60%, #ff7e5f 100%);
+            background   : linear-gradient(90deg, #d70018 60%, #ff8a95 100%);
             border       : none;
             font-weight  : bold;
             height       : 44px;
@@ -47,7 +47,7 @@
             transition   : background 0.2s;
 
             &:hover {
-                background: linear-gradient(90deg, #ff7e5f 60%, #f53d2d 100%);
+                background: linear-gradient(90deg, #ff8a95 60%, #d70018 100%);
             }
         }
     }
@@ -71,7 +71,7 @@
                 align-items    : center;
                 gap            : 2px;
                 font-weight    : 600;
-                color          : #f53d2d;
+                color          : #d70018;
                 font-size      : 16px;
             }
 
@@ -108,9 +108,9 @@
 
             &:hover,
             &.ant-btn-primary {
-                background  : #f53d2d;
+                background  : #d70018;
                 color       : #fff;
-                border-color: #f53d2d;
+                border-color: #d70018;
             }
         }
     }
@@ -145,7 +145,7 @@
         }
 
         span {
-            color    : #ff6c5e;
+            color    : #ff8a95;
             font-size: 15px;
         }
     }
@@ -202,7 +202,7 @@
 
 .reply-item.user-reply {
     background-color: #f0faff;
-    border-left     : 3px solid #1890ff;
+    border-left     : 3px solid #d70018;
     padding         : 10px 16px;
     margin-top      : 10px;
     border-radius   : 6px;
@@ -242,7 +242,7 @@
         .review-score {
             font-size  : 48px;
             font-weight: 700;
-            color      : #f53d2d;
+            color      : #d70018;
             line-height: 1;
         }
 
@@ -262,7 +262,7 @@
         }
 
         .review-button {
-            background   : #f53d2d;
+            background   : #d70018;
             color        : #fff;
             border       : none;
             border-radius: 24px;
@@ -348,7 +348,7 @@
             font-weight  : 600;
 
             &.active {
-                background: #f53d2d;
+                background: #d70018;
                 color     : #fff;
             }
 
@@ -442,7 +442,7 @@
             }
 
             .review-role {
-                background   : #f53d2d;
+                background   : #d70018;
                 color        : #fff;
                 border-radius: 4px;
                 font-size    : 12px;
@@ -540,7 +540,7 @@
         }
 
         .reply-role {
-            background   : #f53d2d;
+            background   : #d70018;
             color        : #fff;
             border-radius: 4px;
             font-size    : 12px;

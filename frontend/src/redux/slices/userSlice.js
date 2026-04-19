@@ -20,17 +20,21 @@ export const userSlice = createSlice({
             const { access_token, refresh_token, ...userInfo } = action.payload;
             state.account = userInfo;
             state.isAuthenticated = true;
-            // Lưu token vào sessionStorage (tự động xóa khi đóng tab)
+            // Lưu token cho cả cùng tab và tab mới
             sessionStorage.setItem('access_token', access_token);
             sessionStorage.setItem('refresh_token', refresh_token);
+            localStorage.setItem('access_token', access_token);
+            localStorage.setItem('refresh_token', refresh_token);
         },
         logout: (state) => {
             state.account = initialState.account;
             state.isAuthenticated = false;
             state.cartCount = 0;
-            // Xóa token
+            // Xóa token ở cả sessionStorage và localStorage
             sessionStorage.removeItem('access_token');
             sessionStorage.removeItem('refresh_token');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
         },
         updateAccount: (state, action) => {
             state.account = {
@@ -52,16 +56,20 @@ export const adminSlice = createSlice({
             const { access_token, refresh_token, ...userInfo } = action.payload;
             state.account = userInfo;
             state.isAuthenticated = true;
-            // Lưu token vào sessionStorage
+            // Lưu token cho cả cùng tab và tab mới
             sessionStorage.setItem('access_token', access_token);
             sessionStorage.setItem('refresh_token', refresh_token);
+            localStorage.setItem('access_token', access_token);
+            localStorage.setItem('refresh_token', refresh_token);
         },
         alogout: (state) => {
             state.account = initialState.account;
             state.isAuthenticated = false;
-            // Xóa token
+            // Xóa token ở cả sessionStorage và localStorage
             sessionStorage.removeItem('access_token');
             sessionStorage.removeItem('refresh_token');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
         },
         aupdateAccount: (state, action) => {
             if (state.account && state.account.id === action.payload.id) {

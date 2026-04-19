@@ -1,17 +1,125 @@
 .app-container {
     display   : flex;
     min-height: 100vh;
+    background: radial-gradient(circle at top right, #dbeafe 0%, #eef2ff 32%, #f8fafc 70%);
 }
 
 .admin-content {
     flex-grow       : 1;
     margin-left     : 250px;
-    padding         : 20px;
-    background-color: #f5f6fa;
+    padding         : 24px;
+    background      : rgba(255, 255, 255, 0.56);
+    backdrop-filter : blur(4px);
     transition      : margin-left 0.3s ease;
+    border-left     : 1px solid rgba(226, 232, 240, 0.8);
 }
 
 
 .sidebar.collapsed~.admin-content {
     margin-left: 70px;
+}
+
+.admin-content .d-flex.justify-content-between.align-items-center,
+.admin-content .d-flex.justify-content-between.align-items-center.mb-3 {
+    background   : #ffffff;
+    border       : 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding      : 12px 14px;
+    box-shadow   : 0 10px 22px rgba(15, 23, 42, 0.06);
+}
+
+.admin-content .table-scroll-wrapper {
+    background   : #ffffff;
+    border       : 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding      : 8px;
+    box-shadow   : 0 12px 24px rgba(15, 23, 42, 0.06);
+}
+
+.admin-content .ant-table-wrapper .ant-table {
+    border-radius: 10px !important;
+}
+
+.admin-content .ant-table-thead>tr>th {
+    background : #f8fafc !important;
+    color      : #0f172a !important;
+    font-weight: 700;
+}
+
+.admin-content .ant-table-tbody>tr>td {
+    color     : #1e293b;
+    border-top: 1px solid #f1f5f9;
+}
+
+.admin-content .ant-table-tbody>tr:hover>td {
+    background: #f8fbff !important;
+}
+
+.admin-content .ant-input,
+.admin-content .ant-select-selector,
+.admin-content .ant-picker,
+.admin-content input,
+.admin-content select {
+    border-radius: 10px !important;
+    border-color : #dbe3ef !important;
+    box-shadow   : none !important;
+}
+
+.admin-content .ant-input:focus,
+.admin-content .ant-select-focused .ant-select-selector,
+.admin-content .ant-picker-focused {
+    border-color: #93c5fd !important;
+    box-shadow  : 0 0 0 3px rgba(147, 197, 253, 0.2) !important;
+}
+
+.admin-content .ant-btn,
+.admin-content .btn {
+    border-radius: 10px !important;
+    font-weight  : 600;
+}
+
+.admin-content .success,
+.admin-content .crud_customer,
+.admin-content .add-users .ant-btn-primary,
+.admin-content .add-users .btn-primary {
+    border          : none !important;
+    border-radius   : 12px !important;
+    background      : linear-gradient(120deg, #2563eb 0%, #4f46e5 55%, #7c3aed 100%) !important;
+    color           : #ffffff !important;
+    box-shadow      : 0 10px 20px rgba(37, 99, 235, 0.24);
+    transition      : transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    font-weight     : 700 !important;
+    letter-spacing  : 0.2px;
+}
+
+.admin-content .success:hover,
+.admin-content .crud_customer:hover,
+.admin-content .add-users .ant-btn-primary:hover,
+.admin-content .add-users .btn-primary:hover {
+    transform : translateY(-1px);
+    box-shadow: 0 14px 24px rgba(79, 70, 229, 0.28);
+    filter    : brightness(1.02);
+}
+
+.admin-content .success:active,
+.admin-content .crud_customer:active,
+.admin-content .add-users .ant-btn-primary:active,
+.admin-content .add-users .btn-primary:active {
+    transform : translateY(0);
+    box-shadow: 0 8px 14px rgba(79, 70, 229, 0.22);
+}
+
+.admin-content .success svg,
+.admin-content .crud_customer svg,
+.admin-content .add-users .ant-btn-primary svg,
+.admin-content .add-users .btn-primary svg {
+    color: #ffffff !important;
+}
+
+.admin-content .ant-pagination .ant-pagination-item-active {
+    border-color: #3b82f6;
+}
+
+.admin-content .ant-pagination .ant-pagination-item-active a {
+    color: #2563eb;
 }

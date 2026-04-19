@@ -10,6 +10,7 @@ const TinTuc = () => {
     const [newsDataNews, setNewsDataNews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [expandedItems, setExpandedItems] = useState({});
 
     const getTimeAgo = (createdAt) => {
         if (!createdAt) return "Vừa xong";
@@ -36,6 +37,40 @@ const TinTuc = () => {
         return "Vừa xong";
     };
 
+    const truncateText = (text, maxLength) => {
+        if (!text) return "";
+        if (text.length <= maxLength) return text;
+        return `${text.slice(0, maxLength).trim()}...`;
+    };
+
+    const toggleExpand = (key) => {
+        setExpandedItems((prev) => ({
+            ...prev,
+            [key]: !prev[key]
+        }));
+    };
+
+    const renderDescription = (text, maxLength, expandKey) => {
+        if (!text) return "Đang cập nhật nội dung";
+        const isLong = text.length > maxLength;
+        const isExpanded = !!expandedItems[expandKey];
+
+        if (!isLong) return text;
+
+        return (
+            <>
+                {isExpanded ? text : truncateText(text, maxLength)}
+                <button
+                    type="button"
+                    className="read-more-btn"
+                    onClick={() => toggleExpand(expandKey)}
+                >
+                    {isExpanded ? " Thu gọn" : " Xem thêm"}
+                </button>
+            </>
+        );
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -58,20 +93,50 @@ const TinTuc = () => {
     }, []);
 
 
-    if (error) return <div>Lỗi: {error}</div>;
-    if (newsData.length === 0) return <div>Không có dữ liệu</div>;
+    const featuredNews = newsDataNews[0];
+    const secondaryNews = newsDataNews.slice(1);
+
+    if (error) return <div className="news-status">Lỗi: {error}</div>;
+    if (loading) return <div className="news-status">Đang tải tin tức...</div>;
+    if (newsData.length === 0 && newsDataNews.length === 0) return <div className="news-status">Không có dữ liệu</div>;
 
     return (
-        <div >
-            <div className='tin-tuc' >
-                <div className="tintuc-header">Tin Tức</div>
-            </div>
-            <div className='tin-tuc' >
-                <div className='tin-tuc-s' style={{ marginBottom: "20px" }}>
+        <div className="news-page">
+            <section className="news-hero">
+                <div className="news-heading">
+                    <p className="news-kicker">Techworld Magazine</p>
+                    <h1>Toàn Cảnh Tin Tức Công Nghệ</h1>
+                    <span className="news-subtitle">Cập nhật xu hướng mới, đánh giá chuyên sâu và điểm nóng thị trường mỗi ngày</span>
+                </div>
+            </section>
+
+            <section className="news-editorial">
+                {featuredNews && (
+                    <article className="news-featured">
+                        <a href={featuredNews.link} target="_blank" rel="noopener noreferrer">
+                            <img src={`${process.env.REACT_APP_BASE_URL}${featuredNews.image}`} alt="tin tức nổi bật" />
+                        </a>
+                        <div className="featured-content">
+                            <div className="featured-meta">
+                                <span>{featuredNews.author || "Ban biên tập"}</span>
+                                <span>{getTimeAgo(featuredNews.update_at)}</span>
+                            </div>
+                            <a href={featuredNews.link} target="_blank" rel="noopener noreferrer">
+                                <h2>{featuredNews.name}</h2>
+                            </a>
+                            <p>
+                                {renderDescription(featuredNews.description, 180, "featured")}
+                            </p>
+                        </div>
+                    </article>
+                )}
+
+                <div className="news-spotlight">
+                    <h3>Bản tin nổi bật</h3>
                     {newsData.map((newsItem, index) => (
-                        <div key={index} className="video">
-                            {newsItem.linkvideo && (
-                                <div className="video-1">
+                        <article key={index} className="spotlight-item">
+                            <div className="spotlight-video">
+                                {newsItem.linkvideo ? (
                                     <iframe
                                         width="560"
                                         height="315"
@@ -81,63 +146,57 @@ const TinTuc = () => {
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                         allowFullScreen
                                     ></iframe>
-                                </div>
-                            )}
-
-                            <div className="video-2">
-                                <div className='video-3'>
-                                    <a href={newsItem.link || "#"}>
-                                        <h2 style={{ marginBottom: "10px", fontSize: "25px", fontWeight: 'bold' }}>{newsItem.name}</h2>
-                                    </a>
-
-                                    <div className="category" style={{ marginBottom: "10px" }}>
-                                        <span className="time">{getTimeAgo(newsItem.update_at)}</span>
-                                    </div>
-
-                                    <p style={{ marginBottom: "15px", lineHeight: "1.5" }}>
-                                        {newsItem.description}
-                                    </p>
-                                    <div style={{ textAlign: "right" }}>
-                                        <p>
-                                            <b>
-                                                {newsItem.author}
-                                            </b>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="related" style={{ marginTop: "40px" }}>
-                                    <a href="a"><button>Số hóa</button></a>
-                                    <a href="a"><button>Điện thoại</button></a>
-                                    <a href="a"><button>Iphone</button></a>
-
+                                ) : (
+                                    <div className="spotlight-empty">Chưa có video</div>
+                                )}
+                            </div>
+                            <div className="spotlight-content">
+                                <a href={newsItem.link || "#"} target="_blank" rel="noopener noreferrer">
+                                    <h4>{newsItem.name}</h4>
+                                </a>
+                                <p>
+                                    {renderDescription(newsItem.description, 210, `spotlight-${index}`)}
+                                </p>
+                                <div className="spotlight-meta">
+                                    <span>{newsItem.author || "Ban biên tập"}</span>
+                                    <span>{getTimeAgo(newsItem.update_at)}</span>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     ))}
                 </div>
-            </div>
+            </section>
 
-            <div className='tin-tuc'>
-                <div className='tin-tuc-s'>
-                    <div className="body-tintuc" id="body-tintuc">
-                        {newsDataNews.map((newsItem, index) => (
-                            <div key={`news-${index}`} className="tintuc-info">
-                                <a href={newsItem.link} target="_blank" rel="noopener noreferrer">
-                                    <img src={`${process.env.REACT_APP_BASE_URL}${newsItem.image}`} alt="tin tuc" />
-                                    <h2 style={{ marginBottom: "10px", fontSize: "25px", fontWeight: 'bold' }}>{newsItem.name}</h2>
-                                </a>
-                                <div className="category" style={{ marginBottom: "5px" }}>
-                                    <span className="time">{newsItem.author}&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;{getTimeAgo(newsItem.update_at)}</span>
-                                </div>
-                                <p>{newsItem.description}</p>
-
-
-                            </div>
-                        ))}
-                    </div>
+            <section className="news-grid">
+                <div className="news-grid-title">
+                    <h3>Tin mới cập nhật</h3>
                 </div>
-            </div>
-        </div >
+                <div className="news-grid-list" id="body-tintuc">
+                    {secondaryNews.map((newsItem, index) => (
+                        <article key={`news-${index}`} className="news-card">
+                            <a href={newsItem.link} target="_blank" rel="noopener noreferrer">
+                                <img src={`${process.env.REACT_APP_BASE_URL}${newsItem.image}`} alt="tin tức" />
+                            </a>
+                            <div className="news-card-content">
+                                <a href={newsItem.link} target="_blank" rel="noopener noreferrer">
+                                    <h4>{newsItem.name}</h4>
+                                </a>
+                                <div className="news-card-meta">
+                                    <span>{newsItem.author || "Ban biên tập"}</span>
+                                    <span>{getTimeAgo(newsItem.update_at)}</span>
+                                </div>
+                                <p>
+                                    {renderDescription(newsItem.description, 110, `card-${index}`)}
+                                </p>
+                            </div>
+                        </article>
+                    ))}
+                    {secondaryNews.length === 0 && (
+                        <div className="news-status">Chưa có thêm bài viết khác</div>
+                    )}
+                </div>
+            </section>
+        </div>
     );
 };
 
@@ -148,22 +207,34 @@ const TuyenDung = () => {
             <div className="body-tuyendung">
                 <div className="tuyendung-header">Tuyển dụng</div>
                 <div className="tuyendung-info">
+                    <div className="tuyendung-highlight">
+                        <p className="highlight-label">Vị trí đang mở</p>
+                        <h2>Nhân viên bán hàng Part-time</h2>
+                        <p className="highlight-desc">
+                            Gia nhập đội ngũ Techworld để làm việc trong môi trường năng động,
+                            được đào tạo kỹ năng tư vấn và cập nhật sản phẩm công nghệ mới liên tục.
+                        </p>
+                        <div className="highlight-meta">
+                            <span>Thu nhập: 5 - 7 triệu/tháng</span>
+                            <span>Khu vực: Hà Đông, Hà Nội</span>
+                            <span>Số lượng: 02</span>
+                        </div>
+                    </div>
                     <h1 className="tieude"><b>NHÂN VIÊN BÁN HÀNG</b></h1>
 
                     <b>1.MÔ TẢ</b>
                     <ul className="tuyendung-noidung">
-                        <li>Vui vẻ, lịch sự chào đón khi khách vào cửa hàng.</li>
+                        <li>Đón tiếp khách hàng với thái độ chuyên nghiệp, thân thiện.</li>
                         <li>
-                            Tìm hiểu nhu cầu, tư vấn các thông tin về: Sản phẩm, dịch vụ,
-                            chương trình khuyến mãi, hậu mãi cho khách hàng.
+                            Tìm hiểu nhu cầu và tư vấn sản phẩm, dịch vụ, chương trình ưu đãi
+                            phù hợp với từng khách hàng.
                         </li>
                         <li>
-                            Sắp xếp sản phẩm gọn gàng, hợp lý, vệ sinh cửa hàng khi hết ca làm
-                            việc.
+                            Trưng bày sản phẩm gọn gàng, hỗ trợ vệ sinh khu vực bán hàng
+                            cuối ca.
                         </li>
                         <li>
-                            Nắm bắt, cập nhật thông tin, tính năng của sản phẩm mới: form sản
-                            phẩm, chất liệu, màu sắc, kiểu dáng...
+                            Cập nhật kiến thức về sản phẩm mới để tư vấn chính xác và tăng trải nghiệm mua sắm.
                         </li>
                     </ul>
 
@@ -171,11 +242,12 @@ const TuyenDung = () => {
                     <ul className="tuyendung-noidung">
                         <li><span>Từ 18h – 21h30 các ngày trong tuần</span></li>
                         <li>Nghỉ 3 ngày/ tháng</li>
+                        <li>Có thể linh hoạt đổi ca theo lịch học/lịch cá nhân (báo trước).</li>
                     </ul>
 
                     <b>3.ĐỊA ĐIỂM LÀM VIỆC</b>
                     <ul className="tuyendung-noidung">
-                        <span>P. Nguyễn Trác, Yên Nghĩa, Hà Đông, Hà Nội</span>
+                        <li>P. Nguyễn Trác, Yên Nghĩa, Hà Đông, Hà Nội</li>
                     </ul>
 
                     <b>4.YÊU CẦU</b>
@@ -190,12 +262,19 @@ const TuyenDung = () => {
                             Yêu thích công nghệ, giao tiếp, chăm sóc khách hàng. Ưu tiên các
                             ứng viên đã làm việc tại các shop bán điện thoại, điện máy.
                         </li>
-                        <li><span>Số lượng cần tuyển: 02</span></li>
+                        <li><span>Số lượng cần tuyển: 02 nhân sự</span></li>
                     </ul>
 
-                    <b>5.QUYỀN LỢI</b>
+                    <b>5.KỸ NĂNG ƯU TIÊN</b>
                     <ul className="tuyendung-noidung">
-                        <li>Thu nhập: <span>5.000.000 - 7.000.000 VNĐ/tháng.</span></li>
+                        <li>Biết sử dụng mạng xã hội cơ bản để hỗ trợ tư vấn và chăm sóc khách.</li>
+                        <li>Có khả năng chụp ảnh/quay video sản phẩm là một lợi thế.</li>
+                        <li>Ưu tiên ứng viên có thể làm việc ổn định tối thiểu 6 tháng.</li>
+                    </ul>
+
+                    <b>6.QUYỀN LỢI</b>
+                    <ul className="tuyendung-noidung">
+                        <li>Thu nhập: <span>5.000.000 - 7.000.000 VNĐ/tháng</span>.</li>
                         <li>Hoa hồng hưởng theo doanh thu bán hàng của cửa hàng.</li>
                         <li>Thưởng thêm theo tăng trưởng cửa hàng.</li>
                         <li>
@@ -209,7 +288,14 @@ const TuyenDung = () => {
                         </li>
                     </ul>
 
-                    <b>6.LIÊN HỆ</b>
+                    <b>7.QUY TRÌNH ỨNG TUYỂN</b>
+                    <ul className="tuyendung-noidung">
+                        <li>Điền biểu mẫu hoặc gửi CV theo thông tin liên hệ bên dưới.</li>
+                        <li>Bộ phận tuyển dụng sẽ liên hệ trong vòng 3 - 5 ngày làm việc.</li>
+                        <li>Phỏng vấn 1 vòng trực tiếp tại cửa hàng.</li>
+                    </ul>
+
+                    <b>8.LIÊN HỆ</b>
                     <ul className="tuyendung-noidung">
                         <li>
                             Ứng viên điền thông tin theo link:
@@ -222,7 +308,8 @@ const TuyenDung = () => {
                             Hoặc nộp hồ sơ trực tiếp tại
                             <b>P. Nguyễn Trác, Yên Nghĩa, Hà Đông, Hà Nội</b>
                         </li>
-                        <li>Hoặc gửi CV qua email:<b> dminhphuong97@gmail.com</b></li>
+                        <li>Hoặc gửi CV qua email: <b>hr@techworld.vn</b></li>
+                        <li>Hotline tuyển dụng: <b>0123 456 789</b> (08:30 - 17:30)</li>
                     </ul>
                 </div>
             </div>
@@ -342,8 +429,8 @@ const LienHe = () => {
                             <b>Địa chỉ:</b> P. Nguyễn Trác, Yên Nghĩa, Hà Đông, Hà Nội<br />
                             <b>Telephone:</b> 0123456789<br />
                             <b>Hotline:</b> 0123456789 - CSKH: 0123456789<br />
-                            <b>Website:</b> <a href="https://github.com/dinorap">Github</a> <br />
-                            <b>E-mail:</b> dminhphuong97@gmail.com<br />
+                            <b>Website:</b> <a href="https://github.com/Linh21010581">Github</a> <br />
+                            <b>E-mail:</b> abc@gmail.com<br />
                             <b>Mã số thuế:</b> 99 99 99 99 99<br />
                             <b>Tài khoản ngân hàng :</b><br />
                             <b>Số TK:</b> 000000000000 <br />

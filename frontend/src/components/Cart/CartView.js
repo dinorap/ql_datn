@@ -7,7 +7,6 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 import { FaTrash } from "react-icons/fa";
 import { IoGiftOutline } from "react-icons/io5";
 import { MdKeyboardArrowLeft } from "react-icons/md";
-import { getVietnamAddressData } from '../../services/apiAddress';
 import { useNavigate } from "react-router-dom";
 import { FaMapMarkedAlt } from "react-icons/fa";
 import { createOrder, sendOrder } from '../../services/apiOrderService';
@@ -16,6 +15,7 @@ import { createPaypalPayment, createVnpayPayment } from '../../services/apiPayme
 import { CurrentlyViewedSlider, SuggestCartSlider } from '../ViewProduct/HomeView';
 import { getLocalCartCount } from '../ViewProduct/count';
 import { getBundledProducts } from '../../services/apiViewService';
+import AddressSelector from '../../page/User/AddressSelector';
 const CartView = () => {
   const navigate = useNavigate();
 
@@ -39,14 +39,9 @@ const CartView = () => {
   const [errors, setErrors] = useState({});
   const [method, setMethod] = useState('delivery'); const [note, setNote] = useState('');
   const maxLength = 128;
-  const [addressData, setAddressData] = useState([]);
   const [storeData, setStoreData] = useState([]);
-  const [detailAddress, setDetailAddress] = useState('');
-  const [cityId, setCityId] = useState('');
-  const [districtId, setDistrictId] = useState('');
-  const [wardId, setWardId] = useState('');
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [selectedStore, setSelectedStore] = useState(null);
   const [pendingStore, setPendingStore] = useState(null);
   const [isReceiverDifferent, setIsReceiverDifferent] = useState(false);
@@ -57,14 +52,13 @@ const CartView = () => {
   const hasLoadedSavedData = useRef(false);
   const [selectedBundles, setSelectedBundles] = useState({});
   const [bundleList, setBundleList] = useState({}); useEffect(() => {
-    const hasData =
-      name || phone || detailAddress || cityId || districtId || wardId;
+    const hasData = name || phone;
     console.log(selectedBundles)
     if (!hasData) return;
 
-    const data = { name, phone, detailAddress, cityId, districtId, wardId };
+    const data = { name, phone };
     localStorage.setItem("checkout_info", JSON.stringify(data));
-  }, [name, phone, detailAddress, cityId, districtId, wardId]);
+  }, [name, phone]);
 
   useEffect(() => {
     cartItems.forEach(async (item) => {
@@ -94,49 +88,10 @@ const CartView = () => {
         const data = JSON.parse(savedInfo);
         setName(data.name || "");
         setPhone(data.phone || "");
-        setDetailAddress(data.detailAddress || "");
-        setCityId(data.cityId || "");
-        setDistrictId(data.districtId || "");
-        setWardId(data.wardId || "");
         hasLoadedSavedData.current = true;
       }
     }
   }, [showPay]);
-
-  useEffect(() => {
-    const selected = addressData.find(c => c.Id === cityId);
-    const nextDistricts = selected?.Districts || [];
-    setDistricts(nextDistricts);
-
-    const validDistrict = nextDistricts.find(d => d.Id === districtId);
-    if (!validDistrict) {
-      setDistrictId('');
-      setWards([]);
-      setWardId('');
-    } else {
-      setWards(validDistrict.Wards || []);
-
-      const validWard = validDistrict.Wards.find(w => w.Id === wardId);
-      if (!validWard) {
-        setWardId('');
-      }
-    }
-  }, [cityId]);
-
-
-
-  useEffect(() => {
-    const selectedCity = addressData.find(c => c.Id === cityId);
-    const selectedDistrict = selectedCity?.Districts.find(d => d.Id === districtId);
-
-    const nextWards = selectedDistrict?.Wards || [];
-    setWards(nextWards);
-
-    const validWard = nextWards.find(w => w.Id === wardId);
-    if (!validWard) {
-      setWardId('');
-    }
-  }, [districtId]);
 
 
 
@@ -151,32 +106,30 @@ const CartView = () => {
     setPendingStore(selectedStore);
   }, [showAddress]);
 
-  useEffect(() => {
-    getVietnamAddressData()
-      .then(res => {
-        setAddressData(res.data);
-      })
-      .catch(err => console.error('Lỗi khi tải địa chỉ:', err));
-  }, []);
   const validateOrder = () => {
     const newErrors = {};
-
-    if (!name.trim()) newErrors.name = 'Vui lòng nhập họ và tên';
-
     const phoneRegex = /^0\d{9,10}$/;
-    if (!phone.trim()) newErrors.phone = 'Vui lòng nhập số điện thoại';
-    else if (!phoneRegex.test(phone)) newErrors.phone = 'Vui lòng nhập đúng định dạng số điện thoại';
 
     if (method === 'delivery') {
-      if (!cityId || !districtId || !wardId) {
+      const selectedAddr = addresses.find((a) => a.id === selectedAddressId);
+      if (!selectedAddr) {
         newErrors.address = 'Vui lòng chọn địa chỉ nhận hàng';
-      }
-      if (!detailAddress.trim()) {
-        newErrors.detailAddress = 'Vui lòng nhập địa chỉ cụ thể';
+      } else {
+        if (!selectedAddr.full_name?.trim()) {
+          newErrors.address = 'Địa chỉ chưa có họ tên người nhận';
+        } else if (!phoneRegex.test(selectedAddr.phone || '')) {
+          newErrors.address = 'Số điện thoại trong địa chỉ chưa đúng định dạng';
+        }
       }
     }
-    if (method === 'pickup' && !selectedStore) {
-      newErrors.selectedStore = 'Vui lòng chọn cửa hàng nhận hàng';
+
+    if (method === 'pickup') {
+      if (!name.trim()) newErrors.name = 'Vui lòng nhập họ và tên';
+      if (!phone.trim()) newErrors.phone = 'Vui lòng nhập số điện thoại';
+      else if (!phoneRegex.test(phone)) newErrors.phone = 'Vui lòng nhập đúng định dạng số điện thoại';
+      if (!selectedStore) {
+        newErrors.selectedStore = 'Vui lòng chọn cửa hàng nhận hàng';
+      }
     }
 
     if (!selectedMethod) newErrors.selectedMethod = 'Vui lòng chọn phương thức thanh toán';
@@ -519,13 +472,20 @@ const CartView = () => {
       return;
     }
 
-    let shipping_address = null;
+    let shipping_address = "";
+    let address_id = null;
+    let selectedAddr = null;
     if (method === 'delivery') {
-      const city = addressData.find(c => c.Id === cityId)?.Name || '';
-      const district = districts.find(d => d.Id === districtId)?.Name || '';
-      const ward = wards.find(w => w.Id === wardId)?.Name || '';
-      shipping_address = `${detailAddress}, ${ward}, ${district}, ${city}`;
+      selectedAddr = addresses.find((a) => a.id === selectedAddressId);
+      if (!selectedAddr) {
+        toast.warning("Vui lòng chọn địa chỉ giao hàng!");
+        return;
+      }
+      shipping_address = `${selectedAddr.detail_address}, ${selectedAddr.ward_name}, ${selectedAddr.district_name}, ${selectedAddr.city_name}`;
+      address_id = selectedAddr.id;
     }
+    const orderPhone = method === 'delivery' ? selectedAddr?.phone || "" : phone;
+    const orderName = method === 'delivery' ? selectedAddr?.full_name || "" : name;
 
     const cart_items = selectedCartItems.map(item => ({
       product_id: item.product_id,
@@ -581,8 +541,9 @@ const CartView = () => {
       delivery_method: method,
       pickup_location_id: method === 'pickup' ? selectedStore : null,
       shipping_address,
-      phone,
-      customer_name: name,
+      address_id,
+      phone: orderPhone,
+      customer_name: orderName,
       receiver_name: isReceiverDifferent ? receiverName : null,
       receiver_phone: isReceiverDifferent ? receiverPhone : null,
       note
@@ -616,7 +577,7 @@ const CartView = () => {
       toast.success("Đơn hàng của bạn đã được đặt");
       handleSendOrderMail({
         email: account.email,
-        name,
+        name: orderName,
         cart_items: allItems,
         total: total
       });
@@ -1066,57 +1027,6 @@ const CartView = () => {
             })}
 
             <div className='info-order'>
-              <form className="order-form">
-                <p className='title-cus'>Người đặt hàng</p>
-                <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
-                  <input
-                    type="text"
-                    placeholder="Họ và tên"
-                    value={name}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setName(value);
-
-                      if (value.trim() === '') {
-                        setErrors(prev => ({ ...prev, name: 'Vui lòng nhập tên' }));
-                      } else {
-                        setErrors(prev => ({ ...prev, name: '' }));
-                      }
-                    }}
-
-                  />
-                  {errors.name && <span className="error-text">{errors.name}</span>}
-                </div>
-
-
-                <div className={`form-group ${errors.phone ? 'has-error' : ''}`}>
-                  <input
-                    type="text"
-                    placeholder="Số điện thoại"
-                    value={phone}
-                    onChange={(e) => {
-                      const value = e.target.value;
-
-                      if (/^\d*$/.test(value)) {
-                        setPhone(value);
-
-                        const phoneRegex = /^0\d{8,11}$/;
-                        if (!phoneRegex.test(value)) {
-                          setErrors(prev => ({ ...prev, phone: 'Vui lòng nhập đúng định dạng số điện thoại' }));
-                        } else {
-                          setErrors(prev => ({ ...prev, phone: '' }));
-                        }
-                      }
-                    }}
-
-                  />
-                  {errors.phone && <span className="error-text">{errors.phone}</span>}
-                </div>
-
-              </form>
-            </div>
-
-            <div className='info-order'>
               <div>
                 <p className='title-cus'>Hình thức nhận hàng</p>
                 <div className="delivery-method">
@@ -1146,49 +1056,17 @@ const CartView = () => {
                 </div>
                 {showDelivery && (
                   <>
-                    <label className="note">Địa chỉ nhận hàng</label>
-                    <div className='address-delivery'>
-                      <select value={cityId} onChange={(e) => setCityId(e.target.value)} className={`${!cityId && errors.address ? "has-error-div" : ""}`}>
-                        <option value="">--Chọn Tỉnh/Thành phố--</option>
-                        {addressData.map(city => (
-                          <option key={city.Id} value={city.Id}>{city.Name}</option>
-                        ))}
-                      </select>
-
-                      <select value={districtId} onChange={(e) => setDistrictId(e.target.value)} disabled={!cityId} className={`${!districtId && errors.address ? "has-error-div" : ""}`}>
-                        <option value="">--Chọn Huyện/Quận--</option>
-                        {districts.map(d => (
-                          <option key={d.Id} value={d.Id}>{d.Name}</option>
-                        ))}
-                      </select>
-
-                      <select value={wardId} onChange={(e) => setWardId(e.target.value)} disabled={!districtId} className={`${!wardId && errors.address ? "has-error-div" : ""}`}>
-                        <option value="">--Chọn Phường/Xã--</option>
-                        {wards.map(w => (
-                          <option key={w.Id} value={w.Id}>{w.Name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    {(!cityId || !districtId || !wardId) && errors.address && (
+                    <AddressSelector
+                      userId={account?.id}
+                      selectedAddressId={selectedAddressId}
+                      onSelectAddress={setSelectedAddressId}
+                      onAddressesLoaded={setAddresses}
+                    />
+                    {!selectedAddressId && errors.address && (
                       <span className="error-text" style={{ marginTop: "-10px", marginBottom: "10px" }}>
                         {errors.address}
                       </span>
                     )}
-                    <label className="note">Địa chỉ cụ thể</label>
-                    <div className={`order-note ${errors.detailAddress && !detailAddress ? 'has-error' : ''}`}>
-                      <textarea
-                        value={detailAddress}
-                        onChange={(e) => {
-                          if (e.target.value.length <= maxLength) {
-                            setDetailAddress(e.target.value);
-                          }
-                        }}
-                        placeholder="(Ví dụ: Số nhà , số đường ...)"
-                        rows={2}
-                      />
-                      <div className="char-count">{note.length}/{maxLength}</div>
-                    </div>
-                    {errors.detailAddress && !detailAddress && <span className="error-text" style={{ marginBottom: "10px" }}>{errors.detailAddress}</span>}
                     <label className="note">Ghi chú (tuỳ chọn)</label>
                     <div className="order-note">
                       <textarea
@@ -1265,6 +1143,46 @@ const CartView = () => {
                 {showPickUp && (
                   <div className='address-pickup'>
                     <>
+                      <label className="note">Thông tin người nhận tại cửa hàng</label>
+                      <div className='ok-fine' style={{ marginBottom: 12 }}>
+                        <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
+                          <input
+                            type="text"
+                            placeholder="Họ và tên"
+                            value={name}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setName(value);
+                              if (value.trim() === '') {
+                                setErrors(prev => ({ ...prev, name: 'Vui lòng nhập họ và tên' }));
+                              } else {
+                                setErrors(prev => ({ ...prev, name: '' }));
+                              }
+                            }}
+                          />
+                          {errors.name && <span className="error-text">{errors.name}</span>}
+                        </div>
+                        <div className={`form-group ${errors.phone ? 'has-error' : ''}`}>
+                          <input
+                            type="text"
+                            placeholder="Số điện thoại"
+                            value={phone}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (/^\d*$/.test(value)) {
+                                setPhone(value);
+                                const phoneRegex = /^0\d{9,10}$/;
+                                if (!phoneRegex.test(value)) {
+                                  setErrors(prev => ({ ...prev, phone: 'Vui lòng nhập đúng định dạng số điện thoại' }));
+                                } else {
+                                  setErrors(prev => ({ ...prev, phone: '' }));
+                                }
+                              }
+                            }}
+                          />
+                          {errors.phone && <span className="error-text">{errors.phone}</span>}
+                        </div>
+                      </div>
                       <label className="note">Chọn cửa hàng</label>
                       <div className='adderss-store' >
                         <div className={`shop-select-box ${errors.selectedStore && !selectedStoreInfo ? 'has-error-div' : ''}`} onClick={() => setShowAddress(true)}>
@@ -1345,7 +1263,7 @@ const CartView = () => {
               onClick={() => countUniqueGifts(selectedCartItems) > 0 && setShowGiftPopup(true)}
               style={{
                 cursor: countUniqueGifts(selectedCartItems) > 0 ? 'pointer' : 'not-allowed',
-                color: countUniqueGifts(selectedCartItems) > 0 ? '#1677ff' : '#999',
+                color: countUniqueGifts(selectedCartItems) > 0 ? '#d70018' : '#999',
                 opacity: countUniqueGifts(selectedCartItems) > 0 ? 1 : 0.6
               }}
             >

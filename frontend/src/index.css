@@ -1,36 +1,37 @@
 :root {
-  --bs-primary: #d32f2f;
-  --bs-primary-rgb: 211, 47, 47;
-  --bs-info: #d32f2f;
-  --bs-info-rgb: 211, 47, 47;
-  --bs-link-color: #d32f2f;
-  --bs-link-hover-color: #b71c1c;
+  /* CellphoneS brand */
+  --bs-primary         : #d70018;
+  --bs-primary-rgb     : 215, 0, 24;
+  --bs-info            : #d70018;
+  --bs-info-rgb        : 215, 0, 24;
+  --bs-link-color      : #d70018;
+  --bs-link-hover-color: #b80014;
 }
 
 .btn-primary {
-  --bs-btn-bg: #d32f2f !important;
-  --bs-btn-border-color: #d32f2f !important;
-  --bs-btn-hover-bg: #b71c1c !important;
-  --bs-btn-hover-border-color: #b71c1c !important;
-  --bs-btn-active-bg: #b71c1c !important;
-  --bs-btn-active-border-color: #b71c1c !important;
+  --bs-btn-bg                 : #d70018 !important;
+  --bs-btn-border-color       : #d70018 !important;
+  --bs-btn-hover-bg           : #b80014 !important;
+  --bs-btn-hover-border-color : #b80014 !important;
+  --bs-btn-active-bg          : #8a0010 !important;
+  --bs-btn-active-border-color: #8a0010 !important;
 }
 
 .btn-outline-primary {
-  --bs-btn-color: #d32f2f !important;
-  --bs-btn-border-color: #d32f2f !important;
-  --bs-btn-hover-bg: #d32f2f !important;
-  --bs-btn-hover-border-color: #d32f2f !important;
-  --bs-btn-active-bg: #d32f2f !important;
-  --bs-btn-active-border-color: #d32f2f !important;
+  --bs-btn-color              : #d70018 !important;
+  --bs-btn-border-color       : #d70018 !important;
+  --bs-btn-hover-bg           : #d70018 !important;
+  --bs-btn-hover-border-color : #d70018 !important;
+  --bs-btn-active-bg          : #b80014 !important;
+  --bs-btn-active-border-color: #b80014 !important;
 }
 
 .bg-primary {
-  background-color: #d32f2f !important;
+  background-color: #d70018 !important;
 }
 
 .text-primary {
-  color: #d32f2f !important;
+  color: #d70018 !important;
 }
 
 body {
@@ -57,6 +58,42 @@ code {
 
 ._6kxvpfh1 {
   zoom: 90%;
+}
+
+/* 2 nút chat nổi (widget bên ngoài): làm nổi bật + nhấp nháy nhẹ */
+@keyframes ext-chat-fab-pulse {
+  0% {
+    transform: translateY(0) scale(1);
+    filter: saturate(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.03);
+    filter: saturate(1.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    filter: saturate(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cti-chatbot-fab_8uj12,
+  ._6kxvpfh1 {
+    animation: ext-chat-fab-pulse 1.9s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .cti-chatbot-fab_8uj12:hover,
+  ._6kxvpfh1:hover {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cti-chatbot-fab_8uj12,
+  ._6kxvpfh1 {
+    animation: none !important;
+  }
 }
 
 body::-webkit-scrollbar {

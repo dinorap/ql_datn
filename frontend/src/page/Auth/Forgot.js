@@ -34,12 +34,16 @@ const Forgot = () => {
 
             <div className="Auth">
 
-                <form>
+                <form className="auth-visual">
+                    <div className="visual-top">
+                        <Link to="/" className="back-home-btn">Quay lại trang chủ</Link>
+                    </div>
                     <img src={ForgotImage} alt="Forgot Password" />
                 </form>
-                <form className="myform" >
-                    <h3 style={{ marginBottom: "-13px" }}>
-                        Xin chào <em>👋</em>, Quên mật khẩu!
+                <form className="myform auth-panel" >
+                    <p className="auth-subtitle">Khôi phục tài khoản</p>
+                    <h3>
+                        Xin chào <em>👋</em>, quên mật khẩu?
                     </h3>
                     <div>
                         <input
@@ -52,10 +56,10 @@ const Forgot = () => {
                         <div className="second-div">
                             <button type="button" onClick={handleForgot}
                                 disabled={isLoading}>
-                                {isLoading ? <ImSpinner10 className="loader-icon" /> : "Quên mật khẩu"}
+                                {isLoading ? <ImSpinner10 className="loader-icon" /> : "Gửi email khôi phục"}
                             </button>
                             <p>
-                                <Link to="/login" color="blue">Quay lại đăng nhập</Link>
+                                <Link to="/login" className="auth-highlight-link">Quay lại đăng nhập</Link>
                             </p>
                         </div>
                     </div>

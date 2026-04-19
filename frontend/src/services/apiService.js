@@ -20,12 +20,12 @@ const postLogOut = () => {
     return axios.post(`api/logout`, {}, { withCredentials: true });
 };
 
-const postRefeshToken = () => {
-    return axios.post("api/refresh-token", {}, { withCredentials: true })
+const postRefeshToken = (refreshToken) => {
+    return axios.post("api/refresh-token", { refreshToken }, { withCredentials: true })
 }
 
-const postChatBot = (input) => {
-    return axios.post("api/chatbot", { message: input })
+const postChatBot = (input, history = []) => {
+    return axios.post("api/chatbot", { message: input, history })
 }
 
 

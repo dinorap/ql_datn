@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import ResetImage from "../../assets/Auth/reset.svg";
 import { toast } from "react-toastify";
 import { postResetPassword } from "../../services/apiService";
@@ -53,10 +53,13 @@ const ResetPassword = () => {
     return (
         <div className="home">
             <div className="Auth">
-                <form>
+                <form className="auth-visual">
+                    <div className="visual-top">
+                        <Link to="/" className="back-home-btn">Quay lại trang chủ</Link>
+                    </div>
                     <img src={ResetImage} alt="Reset Password" />
                 </form>
-                <form className="myform">
+                <form className="myform auth-panel">
                     <h3>🔒 Đặt lại mật khẩu</h3>
                     <div className="reset-password">
 

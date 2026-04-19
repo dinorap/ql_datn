@@ -158,12 +158,16 @@ const Login = () => {
     return (
         <div className="home">
             <div className="Auth">
-                <form>
+                <form className="auth-visual">
+                    <div className="visual-top">
+                        <Link to="/" className="back-home-btn">Quay lại trang chủ</Link>
+                    </div>
                     <img src={LoginImage} alt="Login" />
                 </form>
-                <form className="myform" onSubmit={(e) => e.preventDefault()}>
-                    <h3 style={{ marginBottom: "-13px" }}>
-                        <em>👋</em> Chào mừng bạn trở lại!
+                <form className="myform auth-panel" onSubmit={(e) => e.preventDefault()}>
+                    <p className="auth-subtitle">Đăng nhập tài khoản</p>
+                    <h3>
+                        Chào mừng bạn trở lại
                     </h3>
                     <div>
                         <input
@@ -182,21 +186,19 @@ const Login = () => {
                                     onChange={(event) => setPassword(event.target.value)}
                                     autoComplete="off"
                                 />
-                                <Link style={{ marginTop: "10px", fontSize: '13px' }} to="/forgot">
-                                    Quên mật khẩu
-                                </Link>
                                 <span
-                                    style={{ top: "29%" }}
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="eye-icon"
                                 >
                                     {showPassword ? <VscEye /> : <VscEyeClosed />}
                                 </span>
                             </div>
+                            <Link className="forgot-link" to="/forgot">
+                                Quên mật khẩu
+                            </Link>
                         </div>
                         <div className="second-div">
                             <button
-                                style={{ marginTop: "-5px" }}
                                 type="button"
                                 onClick={handleLogin}
                                 disabled={isLoading}
@@ -204,11 +206,8 @@ const Login = () => {
                                 {isLoading ? <ImSpinner10 className="loader-icon" /> : "Đăng nhập"}
                             </button>
                             <div className="flex-div">
-                                <span style={{ cursor: "pointer" }} onClick={() => navigate("/")}>
-                                    Quay lại trang chủ
-                                </span>
                                 <p>
-                                    Chưa có tài khoản? <Link to="/signup"><b>Tạo tài khoản</b></Link>
+                                    Chưa có tài khoản? <Link to="/signup"><b>Đăng ký ngay</b></Link>
                                 </p>
                             </div>
                         </div>
