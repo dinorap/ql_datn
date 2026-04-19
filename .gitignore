@@ -8,11 +8,6 @@ dist/
 **/build/
 **/dist/
 
-# Environment files
-.env
-.env.*
-**/.env
-**/.env.*
 
 # Logs
 *.log

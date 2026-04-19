@@ -429,35 +429,35 @@
 }
 
 .hero-promo-tabs-strip {
-    display        : flex;
-    align-items    : stretch;
-    flex-shrink    : 0;
-    border-bottom  : 1px solid #eceef2;
-    background     : #fff;
+    display      : flex;
+    align-items  : stretch;
+    flex-shrink  : 0;
+    border-bottom: 1px solid #eceef2;
+    background   : #fff;
 }
 
 .hero-promo-tabs-arrow {
-    flex-shrink     : 0;
-    width           : 36px;
-    display         : flex;
-    align-items     : center;
-    justify-content : center;
-    border          : none;
-    border-right    : 1px solid #f0f0f0;
-    background      : #fff;
-    color           : #444;
-    font-size       : 14px;
-    cursor          : pointer;
-    transition      : background 0.2s, color 0.2s, opacity 0.2s;
+    flex-shrink    : 0;
+    width          : 36px;
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    border         : none;
+    border-right   : 1px solid #f0f0f0;
+    background     : #fff;
+    color          : #444;
+    font-size      : 14px;
+    cursor         : pointer;
+    transition     : background 0.2s, color 0.2s, opacity 0.2s;
 
     &--next {
-        border-right : none;
-        border-left  : 1px solid #f0f0f0;
+        border-right: none;
+        border-left : 1px solid #f0f0f0;
     }
 
     &:hover:not(:disabled) {
         background: #fafafa;
-        color       : #d70018;
+        color     : #d70018;
     }
 
     &:disabled {
@@ -468,18 +468,18 @@
 }
 
 .hero-promo-tabs {
-    display                    : flex;
-    align-items                : stretch;
-    flex                       : 1 1 auto;
-    min-width                  : 0;
-    flex-wrap                  : nowrap;
-    gap                        : 0;
-    overflow-x                 : auto;
-    overflow-y                 : hidden;
-    scrollbar-width            : none;
-    background                 : #fff;
-    -webkit-overflow-scrolling : touch;
-    scroll-snap-type           : x mandatory;
+    display                   : flex;
+    align-items               : stretch;
+    flex                      : 1 1 auto;
+    min-width                 : 0;
+    flex-wrap                 : nowrap;
+    gap                       : 0;
+    overflow-x                : auto;
+    overflow-y                : hidden;
+    scrollbar-width           : none;
+    background                : #fff;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type          : x mandatory;
 
     &::-webkit-scrollbar {
         display: none;
@@ -488,21 +488,21 @@
     }
 
     .hero-promo-tab {
-        flex              : 0 0 25%;
-        min-width         : 25%;
-        max-width         : 25%;
-        width             : 25%;
-        box-sizing        : border-box;
-        padding           : 11px 8px 9px;
-        cursor            : pointer;
-        border            : none;
-        background        : #fff;
-        text-align        : center;
-        border-bottom     : 3px solid transparent;
-        border-right      : 1px solid #f0f0f0;
-        transition        : color 0.2s, border-color 0.2s, background 0.2s;
-        scroll-snap-align : start;
-        scroll-snap-stop  : always;
+        flex             : 0 0 25%;
+        min-width        : 25%;
+        max-width        : 25%;
+        width            : 25%;
+        box-sizing       : border-box;
+        padding          : 11px 8px 9px;
+        cursor           : pointer;
+        border           : none;
+        background       : #fff;
+        text-align       : center;
+        border-bottom    : 3px solid transparent;
+        border-right     : 1px solid #f0f0f0;
+        transition       : color 0.2s, border-color 0.2s, background 0.2s;
+        scroll-snap-align: start;
+        scroll-snap-stop : always;
 
         &:last-child {
             border-right: none;
