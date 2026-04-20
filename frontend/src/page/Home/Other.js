@@ -104,7 +104,7 @@ const TinTuc = () => {
         <div className="news-page">
             <section className="news-hero">
                 <div className="news-heading">
-                    <p className="news-kicker">Techworld Magazine</p>
+                    <p className="news-kicker">Thế giới công nghệ Magazine</p>
                     <h1>Toàn Cảnh Tin Tức Công Nghệ</h1>
                     <span className="news-subtitle">Cập nhật xu hướng mới, đánh giá chuyên sâu và điểm nóng thị trường mỗi ngày</span>
                 </div>
@@ -211,7 +211,7 @@ const TuyenDung = () => {
                         <p className="highlight-label">Vị trí đang mở</p>
                         <h2>Nhân viên bán hàng Part-time</h2>
                         <p className="highlight-desc">
-                            Gia nhập đội ngũ Techworld để làm việc trong môi trường năng động,
+                            Gia nhập đội ngũ Thế giới công nghệ để làm việc trong môi trường năng động,
                             được đào tạo kỹ năng tư vấn và cập nhật sản phẩm công nghệ mới liên tục.
                         </p>
                         <div className="highlight-meta">
@@ -308,7 +308,7 @@ const TuyenDung = () => {
                             Hoặc nộp hồ sơ trực tiếp tại
                             <b>P. Nguyễn Trác, Yên Nghĩa, Hà Đông, Hà Nội</b>
                         </li>
-                        <li>Hoặc gửi CV qua email: <b>hr@techworld.vn</b></li>
+                        <li>Hoặc gửi CV qua email: <b>hr@thegioicongnghe.vn</b></li>
                         <li>Hotline tuyển dụng: <b>0123 456 789</b> (08:30 - 17:30)</li>
                     </ul>
                 </div>
@@ -424,7 +424,7 @@ const LienHe = () => {
                     <div className="lienhe-header">Liên hệ</div>
                     <div className="lienhe-info">
                     <div className="info-left">
-                        <h2> <b>CÔNG TY CỔ PHẦN TECHWORLD</b> </h2><br />
+                        <h2> <b>CÔNG TY CỔ PHẦN THẾ GIỚI CÔNG NGHỆ</b> </h2><br />
                         <p>
                             <b>Địa chỉ:</b> P. Nguyễn Trác, Yên Nghĩa, Hà Đông, Hà Nội<br />
                             <b>Telephone:</b> 0123456789<br />

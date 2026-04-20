@@ -436,7 +436,7 @@ const TopNav = () => {
                                 <FaRegHandshake /> {t('recruitment')}
                             </NavLink>
                             <NavLink className="nav-link" to="/lienhe" >
-                                <IoIosInformationCircle /> Thêm thông tin
+                                <IoIosInformationCircle /> Về chúng tôi
                             </NavLink>
                         </Nav>
                     </div>

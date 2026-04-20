@@ -60,7 +60,7 @@ const ResetPassword = () => {
                     <img src={ResetImage} alt="Reset Password" />
                 </form>
                 <form className="myform auth-panel">
-                    <h3>🔒 Đặt lại mật khẩu</h3>
+                    <h3 style={{ marginBottom: "20px" }}>Đặt lại mật khẩu</h3>
                     <div className="reset-password">
 
                         <div className="mydiv">

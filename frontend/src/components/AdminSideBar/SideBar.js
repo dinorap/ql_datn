@@ -154,7 +154,7 @@ const SideBar = () => {
 
             {!collapsed ? (
                 <div className="logo">
-                    <h2>Tech World Pro</h2>
+                    <h2>Thế giới công nghệ</h2>
                     <p>ADMIN management</p>
                 </div>
             ) : (

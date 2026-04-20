@@ -1136,7 +1136,7 @@ const getRecommendedProductsByUser = async (req, res) => {
             SELECT product_id FROM recently_viewed_products
             WHERE user_id = ?
             ORDER BY viewed_at DESC
-            LIMIT 10
+            LIMIT 5
         `, [userId]);
 
         if (viewedRows.length === 0) {
@@ -1146,27 +1146,59 @@ const getRecommendedProductsByUser = async (req, res) => {
         const viewedProductIds = viewedRows.map(r => r.product_id);
 
         const [viewedProducts] = await connection.query(`
-            SELECT p.id, p.company_id, p.category_id, p.operating_system,
-                   vo.ram, vo.rom, v.base_price
+            SELECT 
+                p.id, p.company_id, p.category_id, p.operating_system,
+                vo.ram, vo.rom, v.base_price
             FROM products p
-            LEFT JOIN product_variants v ON v.product_id = p.id
-            LEFT JOIN product_variant_options vo ON vo.variant_id = v.id
+            LEFT JOIN product_variants v ON v.id = (
+                SELECT id FROM product_variants WHERE product_id = p.id ORDER BY id ASC LIMIT 1
+            )
+            LEFT JOIN product_variant_options vo ON vo.id = (
+                SELECT id FROM product_variant_options WHERE variant_id = v.id ORDER BY id ASC LIMIT 1
+            )
             WHERE p.id IN (?)
         `, [viewedProductIds]);
 
-        const categoryIds = [...new Set(viewedProducts.map(p => p.category_id))];
-        const companies = [...new Set(viewedProducts.map(p => p.company_id))];
-        const operatingSystems = [...new Set(viewedProducts.map(p => p.operating_system).filter(Boolean))];
-        const avgPrice = viewedProducts.reduce((sum, p) => sum + parseFloat(p.base_price || 0), 0) / viewedProducts.length;
-        const minPrice = avgPrice * 0.7;
-        const maxPrice = avgPrice * 1.3;
+        const viewedOrderMap = new Map();
+        viewedRows.forEach((row, idx) => {
+            // Sản phẩm xem gần nhất có trọng số cao hơn.
+            viewedOrderMap.set(row.product_id, 5 - idx);
+        });
+
+        const makeFrequencyMap = (rows, keyGetter) => {
+            const map = new Map();
+            rows.forEach((row) => {
+                const key = keyGetter(row);
+                if (key === null || key === undefined || key === "") return;
+                const weight = viewedOrderMap.get(row.id) || 1;
+                map.set(key, (map.get(key) || 0) + weight);
+            });
+            return map;
+        };
+
+        const categoryWeightMap = makeFrequencyMap(viewedProducts, (r) => r.category_id);
+        const companyWeightMap = makeFrequencyMap(viewedProducts, (r) => r.company_id);
+        const osWeightMap = makeFrequencyMap(viewedProducts, (r) => r.operating_system);
+        const ramWeightMap = makeFrequencyMap(viewedProducts, (r) => r.ram);
+        const romWeightMap = makeFrequencyMap(viewedProducts, (r) => r.rom);
+
+        const categoryIds = [...categoryWeightMap.keys()];
+        const dominantCategoryId = [...categoryWeightMap.entries()]
+            .sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+        const prices = viewedProducts
+            .map((p) => parseFloat(p.base_price || 0))
+            .filter((price) => Number.isFinite(price) && price > 0);
+        const avgPrice = prices.length
+            ? prices.reduce((sum, p) => sum + p, 0) / prices.length
+            : 0;
+        const minPrice = avgPrice > 0 ? avgPrice * 0.6 : 0;
+        const maxPrice = avgPrice > 0 ? avgPrice * 1.4 : Number.MAX_SAFE_INTEGER;
 
         const [promotionTypes] = await connection.query(`SELECT * FROM promotion_types`);
         const promoTypeMap = {};
         promotionTypes.forEach(type => promoTypeMap[type.id] = type.formula);
 
         let candidates = [];
-
 
         for (const categoryId of categoryIds) {
             const [result] = await connection.query(`
@@ -1197,13 +1229,77 @@ const getRecommendedProductsByUser = async (req, res) => {
             candidates.push(...result);
         }
 
-
         const uniqueMap = new Map();
-        candidates.forEach(p => {
-            if (!uniqueMap.has(p.product_id)) {
-                uniqueMap.set(p.product_id, p);
+        const mergeCandidates = (rows = []) => {
+            rows.forEach((p) => {
+                if (!uniqueMap.has(p.product_id)) {
+                    uniqueMap.set(p.product_id, p);
+                }
+            });
+        };
+        mergeCandidates(candidates);
+
+        // Nguồn dữ liệu gợi ý ban đầu lọc theo khoảng giá có thể quá hẹp.
+        // Nếu kết quả quá ít, mở rộng dần để tránh chỉ hiện 1 sản phẩm.
+        if (uniqueMap.size < 10) {
+            for (const categoryId of categoryIds) {
+                const [fallbackByCategory] = await connection.query(`
+                    SELECT 
+                        p.id AS product_id, p.name AS product_name, p.product_code, p.screen, p.refresh_rate, p.screen_technology,
+                        p.is_installment_available, p.description, p.is_active, p.operating_system, p.company_id,
+                        v.id AS variant_id, v.color, v.base_price,
+                        vo.ram, vo.rom,
+                        pi.image_data AS image,
+                        pr.discount_value, pr.promotion_type_id,
+                        pt.name AS promotion_type_name, pt.code AS promotion_code,
+                        (SELECT AVG(rating) FROM product_reviews WHERE product_id = p.id AND is_active = 1) AS avg_rating,
+                        (SELECT COUNT(*) FROM product_reviews WHERE product_id = p.id AND is_active = 1 AND rating IS NOT NULL) AS total_reviews
+                    FROM products p
+                    LEFT JOIN product_variants v ON v.id = (
+                        SELECT id FROM product_variants WHERE product_id = p.id ORDER BY id ASC LIMIT 1
+                    )
+                    LEFT JOIN product_variant_options vo ON vo.id = (
+                        SELECT id FROM product_variant_options WHERE variant_id = v.id ORDER BY id ASC LIMIT 1
+                    )
+                    LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.variant_id IS NULL AND pi.is_primary = 1
+                    LEFT JOIN promotions pr ON pr.variant_id = v.id AND pr.end_date > NOW()
+                    LEFT JOIN promotion_types pt ON pr.promotion_type_id = pt.id
+                    WHERE p.id NOT IN (?) AND p.category_id = ? AND p.is_active = 1
+                    LIMIT 20
+                `, [viewedProductIds, categoryId]);
+                mergeCandidates(fallbackByCategory);
+                if (uniqueMap.size >= 10) break;
             }
-        });
+        }
+
+        if (uniqueMap.size < 10) {
+            const [fallbackGlobal] = await connection.query(`
+                SELECT 
+                    p.id AS product_id, p.name AS product_name, p.product_code, p.screen, p.refresh_rate, p.screen_technology,
+                    p.is_installment_available, p.description, p.is_active, p.operating_system, p.company_id,
+                    v.id AS variant_id, v.color, v.base_price,
+                    vo.ram, vo.rom,
+                    pi.image_data AS image,
+                    pr.discount_value, pr.promotion_type_id,
+                    pt.name AS promotion_type_name, pt.code AS promotion_code,
+                    (SELECT AVG(rating) FROM product_reviews WHERE product_id = p.id AND is_active = 1) AS avg_rating,
+                    (SELECT COUNT(*) FROM product_reviews WHERE product_id = p.id AND is_active = 1 AND rating IS NOT NULL) AS total_reviews
+                FROM products p
+                LEFT JOIN product_variants v ON v.id = (
+                    SELECT id FROM product_variants WHERE product_id = p.id ORDER BY id ASC LIMIT 1
+                )
+                LEFT JOIN product_variant_options vo ON vo.id = (
+                    SELECT id FROM product_variant_options WHERE variant_id = v.id ORDER BY id ASC LIMIT 1
+                )
+                LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.variant_id IS NULL AND pi.is_primary = 1
+                LEFT JOIN promotions pr ON pr.variant_id = v.id AND pr.end_date > NOW()
+                LEFT JOIN promotion_types pt ON pr.promotion_type_id = pt.id
+                WHERE p.id NOT IN (?) AND p.is_active = 1
+                LIMIT 30
+            `, [viewedProductIds]);
+            mergeCandidates(fallbackGlobal);
+        }
+
         candidates = Array.from(uniqueMap.values());
 
 
@@ -1216,12 +1312,41 @@ const getRecommendedProductsByUser = async (req, res) => {
                 ? calculateDynamicSalePrice(total_before_discount, formula, p.discount_value)
                 : total_before_discount;
 
+            const categorySignal = categoryWeightMap.get(p.category_id) || 0;
+            const companySignal = companyWeightMap.get(p.company_id) || 0;
+            const osSignal = osWeightMap.get(p.operating_system) || 0;
+            const ramSignal = ramWeightMap.get(p.ram) || 0;
+            const romSignal = romWeightMap.get(p.rom) || 0;
+
             let score = 0;
-            if (companies.includes(p.company_id)) score += 3;
-            if (operatingSystems.includes(p.operating_system)) score += 1;
-            if (p.ram && viewedProducts.find(v => v.ram === p.ram)) score += 1;
-            if (p.rom && viewedProducts.find(v => v.rom === p.rom)) score += 1;
-            if (p.avg_rating >= 4.0) score += 1;
+            score += categorySignal * 1.2;
+            score += companySignal * 1.8; // Ví dụ user xem Apple nhiều -> ưu tiên Apple
+            score += osSignal * 0.8;
+            score += ramSignal * 0.7;
+            score += romSignal * 0.7;
+
+            // Ưu tiên đúng loại sản phẩm người dùng đang xem gần đây (vd iPhone => điện thoại).
+            if (dominantCategoryId !== null) {
+                if (p.category_id === dominantCategoryId) score += 4;
+                else score -= 2.5;
+            }
+
+            if (avgPrice > 0 && Number.isFinite(base_price) && base_price > 0) {
+                const priceDiffRatio = Math.abs(base_price - avgPrice) / avgPrice;
+                if (priceDiffRatio <= 0.12) score += 3;
+                else if (priceDiffRatio <= 0.25) score += 2;
+                else if (priceDiffRatio <= 0.4) score += 1;
+            }
+
+            const rating = Number(p.avg_rating || 0);
+            if (rating >= 4.5) score += 2.5;
+            else if (rating >= 4.0) score += 1.5;
+            else if (rating >= 3.5) score += 0.75;
+
+            const totalReviews = Number(p.total_reviews || 0);
+            if (totalReviews >= 100) score += 1.5;
+            else if (totalReviews >= 50) score += 1;
+            else if (totalReviews >= 20) score += 0.5;
 
             return {
                 product_id: p.product_id,
@@ -1252,9 +1377,27 @@ const getRecommendedProductsByUser = async (req, res) => {
         });
 
 
-        const top10 = processed
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 10);
+        const sorted = processed
+            .sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                if ((b.total_reviews || 0) !== (a.total_reviews || 0)) {
+                    return (b.total_reviews || 0) - (a.total_reviews || 0);
+                }
+                return (b.average_rating || 0) - (a.average_rating || 0);
+            });
+
+        const sameCategory = dominantCategoryId === null
+            ? sorted
+            : sorted.filter((item) => item.category_id === dominantCategoryId);
+        const otherCategories = dominantCategoryId === null
+            ? []
+            : sorted.filter((item) => item.category_id !== dominantCategoryId);
+
+        // Ưu tiên phần lớn kết quả cùng category; chỉ bù từ category khác khi không đủ.
+        const top10 = [
+            ...sameCategory.slice(0, 8),
+            ...otherCategories.slice(0, 10),
+        ].slice(0, 10);
 
         return res.json({ EC: 0, EM: "Gợi ý thành công", data: top10 });
 

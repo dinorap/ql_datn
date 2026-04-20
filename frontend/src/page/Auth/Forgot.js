@@ -43,7 +43,7 @@ const Forgot = () => {
                 <form className="myform auth-panel" >
                     <p className="auth-subtitle">Khôi phục tài khoản</p>
                     <h3>
-                        Xin chào <em>👋</em>, quên mật khẩu?
+                        Quên mật khẩu?
                     </h3>
                     <div>
                         <input

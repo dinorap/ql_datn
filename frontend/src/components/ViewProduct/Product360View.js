@@ -6,13 +6,17 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 
 const Product360View = ({ img_3d }) => {
 
-    const BASE_URL = process.env.REACT_APP_BASE_URL; const modelPathFromDB = img_3d;
-
-    const fullModelUrl = BASE_URL + modelPathFromDB;
+    const BASE_URL = process.env.REACT_APP_BASE_URL || "";
+    const modelPathFromDB = (img_3d || "").trim();
+    const fullModelUrl = modelPathFromDB
+        ? `${BASE_URL}${modelPathFromDB}`
+        : "";
 
     const mountRef = useRef(null);
 
     useEffect(() => {
+        if (!mountRef.current || !fullModelUrl) return undefined;
+
         const scene = new THREE.Scene();
 
         const camera = new THREE.PerspectiveCamera(45, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000);
@@ -21,46 +25,64 @@ const Product360View = ({ img_3d }) => {
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.5; mountRef.current.appendChild(renderer.domElement);
+        renderer.toneMappingExposure = 1.5;
+        mountRef.current.appendChild(renderer.domElement);
 
-        fetch('/mirrored_hall_4k.hdr')
-            .then(res => res.blob())
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const loader = new RGBELoader();
-                loader.load(url, (texture) => {
-                    texture.mapping = THREE.EquirectangularReflectionMapping;
-                    scene.environment = texture;
-                    scene.background = texture;
-                    URL.revokeObjectURL(url);
-                });
-            });
+        // Không để lỗi fetch HDR làm crash runtime.
+        const envLoader = new RGBELoader();
+        envLoader.load(
+            '/mirrored_hall_4k.hdr',
+            (texture) => {
+                texture.mapping = THREE.EquirectangularReflectionMapping;
+                scene.environment = texture;
+                scene.background = texture;
+            },
+            undefined,
+            () => {
+                const ambient = new THREE.AmbientLight(0xffffff, 1.1);
+                const directional = new THREE.DirectionalLight(0xffffff, 1.2);
+                directional.position.set(2, 2, 2);
+                scene.add(ambient);
+                scene.add(directional);
+            }
+        );
 
 
         const loader = new GLTFLoader();
-        loader.load(fullModelUrl, (gltf) => {
-            const model = gltf.scene;
+        loader.load(
+            fullModelUrl,
+            (gltf) => {
+                const model = gltf.scene;
 
-            model.scale.set(5, 5, 5);
-            const box = new THREE.Box3().setFromObject(model);
-            const center = box.getCenter(new THREE.Vector3());
-            model.position.sub(center);
-            model.rotation.y = Math.PI;
+                model.scale.set(5, 5, 5);
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                model.position.sub(center);
+                model.rotation.y = Math.PI;
 
-            scene.add(model);
-        });
+                scene.add(model);
+            },
+            undefined,
+            (error) => {
+                console.error("Không tải được model 3D:", error);
+            }
+        );
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
+        let animationId = null;
         const animate = () => {
-            requestAnimationFrame(animate);
+            animationId = requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
         };
         animate();
 
         return () => {
+            if (animationId) cancelAnimationFrame(animationId);
+            controls.dispose();
+            renderer.dispose();
             if (mountRef.current && renderer.domElement) {
                 try {
                     mountRef.current.removeChild(renderer.domElement);
@@ -70,7 +92,7 @@ const Product360View = ({ img_3d }) => {
             }
         };
 
-    }, []);
+    }, [fullModelUrl]);
 
     return <div ref={mountRef} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />;
 

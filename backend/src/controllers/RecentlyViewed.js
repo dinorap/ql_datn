@@ -10,7 +10,10 @@ const createRecentlyViewedProduct = async (req, res) => {
     } = req.body;
 
     try {
-        await connection.query(`DELETE FROM recently_viewed_products WHERE product_id = ?`, [product_id]);
+        await connection.query(
+            `DELETE FROM recently_viewed_products WHERE product_id = ? AND user_id = ?`,
+            [product_id, user_id]
+        );
 
         const sql = `
           INSERT INTO recently_viewed_products (

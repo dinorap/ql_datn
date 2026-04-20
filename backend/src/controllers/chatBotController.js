@@ -44,7 +44,7 @@ QUY TẮC DỮ LIỆU CỬA HÀNG (bắt buộc):
 5. Phần "mo_ta_ngan" trong JSON là mô tả shop — ưu tiên dùng; không bịa thêm thông số kỹ thuật không có trong JSON hoặc trong câu hỏi.
 6. TUYỆT ĐỐI không được ghi trong câu trả lời cụm "(Tham khảo chung, không thuộc dữ liệu cửa hàng)" hay bất kỳ nhãn/tiền tố tương tự. Trả lời tự nhiên; nếu bổ sung hiểu biết chung (ngoài JSON) thì ngắn gọn, không gán giá hay chương trình cửa hàng cho phần đó.
 7. Hội thoại nhiều lượt: luôn đọc các lượt user/model phía trên. Câu ngắn như "còn màu nào", "giá màu X", "256GB bao nhiêu" là hỏi tiếp — trả lời đúng máy đó từ cac_mau_chi_tiet / cau_hinh; không liệt kê sản phẩm khác ngoài JSON.
-8. Luôn trả lời tiếng Việt, giọng thân thiện, khoảng 3–8 câu, không dông dài.`;
+8. Luôn trả lời cùng ngôn ngữ khách đang dùng trong tin nhắn gần nhất (ví dụ: khách hỏi tiếng Anh thì trả lời tiếng Anh, hỏi tiếng Việt thì trả lời tiếng Việt). Giọng thân thiện, khoảng 3-8 câu, không dông dài.`;
 
 const MAX_HISTORY_TURNS = 24;
 
@@ -78,13 +78,58 @@ function trimHistoryForGemini(history) {
 function buildCatalogSearchText(message, history) {
     const lines = [];
     for (const turn of history.slice(-14)) {
+        if (turn.role !== "user") continue;
         lines.push(turn.text);
     }
     lines.push(String(message || "").trim());
     return lines.filter(Boolean).join("\n").slice(0, 12000);
 }
 
-function buildGeminiContents(history, catalogJson, message) {
+function detectMessageLanguage(message) {
+    const text = String(message || "").trim();
+    if (!text) return "vi";
+
+    // Có dấu tiếng Việt => ưu tiên tiếng Việt.
+    if (/[ăâđêôơưáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệóòỏõọốồổỗộớờởỡợúùủũụứừửữựíìỉĩịýỳỷỹỵ]/i.test(text)) {
+        return "vi";
+    }
+
+    // Câu tiếng Anh phổ biến hoặc chỉ gồm ký tự latin đơn giản.
+    if (/\b(hello|hi|hey|thanks|thank you|price|stock|iphone|how much|can you|please)\b/i.test(text)) {
+        return "en";
+    }
+
+    if (/^[a-z0-9\s.,!?'"()-]+$/i.test(text)) {
+        return "en";
+    }
+
+    return "vi";
+}
+
+function isGreetingOnlyMessage(message) {
+    const text = String(message || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, " ")
+        .replace(/\s+/g, " ");
+
+    if (!text) return false;
+
+    const greetings = new Set([
+        "hello",
+        "hi",
+        "hey",
+        "helo",
+        "xin chao",
+        "chao",
+        "alo",
+        "yo",
+    ]);
+
+    return greetings.has(text);
+}
+
+function buildGeminiContents(history, catalogJson, message, replyLanguage) {
     const contents = [];
     const h = trimHistoryForGemini(parseChatHistory(history));
     while (h.length > 0 && h[h.length - 1].role === "user") {
@@ -100,6 +145,8 @@ function buildGeminiContents(history, catalogJson, message) {
     }
     const augmentedUserText = `=== DU_LIEU_CUA_HANG (JSON) ===
 ${catalogJson}
+=== NGON_NGU_TRA_LOI_BAT_BUOC ===
+${replyLanguage === "en" ? "English" : "Vietnamese"}
 === CAU_HOI_KHACH ===
 ${message}`;
     contents.push({ role: "user", parts: [{ text: augmentedUserText }] });
@@ -118,6 +165,19 @@ const chatBot = async (req, res) => {
         }
 
         const parsedHistory = parseChatHistory(history);
+        const replyLanguage = detectMessageLanguage(message);
+
+        if (isGreetingOnlyMessage(message)) {
+            const greetingReply =
+                replyLanguage === "en"
+                    ? "Hello! I am the store assistant. I can help you check products, prices, configurations, stock, and promotions. What would you like to find today?"
+                    : "Chào bạn! Mình là trợ lý của cửa hàng. Mình có thể giúp bạn tra cứu sản phẩm, giá, cấu hình, tồn kho và khuyến mãi. Bạn muốn tìm gì hôm nay?";
+            return res.status(200).json({
+                EC: 0,
+                EM: "Thành công",
+                response_data: greetingReply,
+            });
+        }
 
         let catalogPayload = {
             matches: [],
@@ -147,7 +207,12 @@ const chatBot = async (req, res) => {
             systemInstruction: {
                 parts: [{ text: SYSTEM_INSTRUCTION }],
             },
-            contents: buildGeminiContents(parsedHistory, catalogJson, message),
+            contents: buildGeminiContents(
+                parsedHistory,
+                catalogJson,
+                message,
+                replyLanguage
+            ),
             generationConfig: {
                 temperature: 0.45,
                 topK: 32,

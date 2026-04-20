@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBundledProducts, getOneProductExpandFormat } from '../../../services/apiViewService';
+import { addRecentlyViewed } from '../../../services/apiRecentlyViewed';
 import './ProductDetailPage.scss';
 import VariantImageSlider from '../../../components/ViewProduct/VariantImageSlider';
 import { CiCirclePlus } from "react-icons/ci";
@@ -72,6 +73,36 @@ const ProductDetailPage = () => {
                 setSelectedOption(defaultOption);
                 setSelectedRam(defaultOption?.ram || null);
                 setSelectedRom(defaultOption?.rom || null);
+
+                if (account?.id) {
+                    const firstVariant = res.data.variants?.[0];
+                    const firstOption = firstVariant?.options?.[0];
+                    const firstImage = firstVariant?.images?.[0] || res.data?.primary_image || "";
+
+                    try {
+                        await addRecentlyViewed({
+                            product_id: res.data.id,
+                            product_name: res.data.name,
+                            description: res.data.description || "",
+                            is_active: res.data.is_active ?? 1,
+                            is_installment_available: res.data.is_installment_available ?? 0,
+                            screen: res.data.screen || "",
+                            refresh_rate: res.data.refresh_rate || "",
+                            screen_technology: res.data.screen_technology || "",
+                            base_price: firstOption?.base_option_price ?? 0,
+                            final_price: firstOption?.final_price ?? 0,
+                            image: firstImage,
+                            promotion_code: firstOption?.promotion_code || null,
+                            promotion_type_name: firstOption?.promotion_type_name || null,
+                            discount_value: firstOption?.discount_value ?? 0,
+                            average_rating: res.data.average_rating ?? 0,
+                            total_reviews: res.data.total_reviews ?? 0,
+                            user_id: account.id,
+                        });
+                    } catch (error) {
+                        console.error("Không thể lưu sản phẩm đã xem:", error);
+                    }
+                }
             }
             const bundleRes = await getBundledProducts(id);
 
@@ -79,7 +110,7 @@ const ProductDetailPage = () => {
             setLoading(false);
         };
         fetchProduct();
-    }, [id]);
+    }, [id, account?.id]);
     console.log(product)
 
     const handleAddToCompare = (product) => {
