@@ -209,107 +209,108 @@ const TuyenDung = () => {
                 <div className="tuyendung-info">
                     <div className="tuyendung-highlight">
                         <p className="highlight-label">Vị trí đang mở</p>
-                        <h2>Nhân viên bán hàng Part-time</h2>
+                        <h2>Chuyên viên Nội dung Sản phẩm (Full-time)</h2>
                         <p className="highlight-desc">
-                            Gia nhập đội ngũ Thế giới công nghệ để làm việc trong môi trường năng động,
-                            được đào tạo kỹ năng tư vấn và cập nhật sản phẩm công nghệ mới liên tục.
+                            Trực tiếp xây dựng nội dung mô tả sản phẩm, kịch bản livestream và
+                            chiến dịch truyền thông ngắn hạn cho các đợt ra mắt thiết bị mới.
                         </p>
                         <div className="highlight-meta">
-                            <span>Thu nhập: 5 - 7 triệu/tháng</span>
-                            <span>Khu vực: Hà Đông, Hà Nội</span>
-                            <span>Số lượng: 02</span>
+                            <span>Thu nhập: 12 - 18 triệu/tháng + thưởng hiệu quả</span>
+                            <span>Địa điểm: Hybrid (2 ngày remote/tuần)</span>
+                            <span>Số lượng: 03</span>
                         </div>
                     </div>
-                    <h1 className="tieude"><b>NHÂN VIÊN BÁN HÀNG</b></h1>
+                    <h1 className="tieude"><b>CHUYÊN VIÊN NỘI DUNG SẢN PHẨM</b></h1>
 
                     <b>1.MÔ TẢ</b>
                     <ul className="tuyendung-noidung">
-                        <li>Đón tiếp khách hàng với thái độ chuyên nghiệp, thân thiện.</li>
                         <li>
-                            Tìm hiểu nhu cầu và tư vấn sản phẩm, dịch vụ, chương trình ưu đãi
-                            phù hợp với từng khách hàng.
+                            Viết nội dung cho landing page, bài social và kịch bản video ngắn
+                            theo từng nhóm sản phẩm.
                         </li>
                         <li>
-                            Trưng bày sản phẩm gọn gàng, hỗ trợ vệ sinh khu vực bán hàng
-                            cuối ca.
+                            Phối hợp với đội Media quay review nhanh, unbox và clip so sánh tính năng.
                         </li>
                         <li>
-                            Cập nhật kiến thức về sản phẩm mới để tư vấn chính xác và tăng trải nghiệm mua sắm.
+                            Nghiên cứu insight khách hàng để chuyển hóa thành thông điệp bán hàng
+                            rõ ràng, dễ hiểu.
+                        </li>
+                        <li>
+                            Cập nhật trend công nghệ hàng tuần và đề xuất mini-campaign phù hợp
+                            từng giai đoạn bán hàng.
+                        </li>
+                        <li>
+                            Theo dõi hiệu quả nội dung qua số liệu click, thời gian đọc và tỷ lệ chuyển đổi.
                         </li>
                     </ul>
 
                     <b>2.THỜI GIAN LÀM VIỆC</b>
                     <ul className="tuyendung-noidung">
-                        <li><span>Từ 18h – 21h30 các ngày trong tuần</span></li>
-                        <li>Nghỉ 3 ngày/ tháng</li>
-                        <li>Có thể linh hoạt đổi ca theo lịch học/lịch cá nhân (báo trước).</li>
+                        <li><span>Thứ 2 - Thứ 6: 08:30 - 17:30</span></li>
+                        <li><span>Thứ 7 linh hoạt: 09:00 - 12:00 (2 buổi/tháng)</span></li>
+                        <li>Nghỉ Chủ nhật và các ngày lễ theo quy định.</li>
+                        <li>Áp dụng mô hình Hybrid sau 2 tháng thử việc.</li>
                     </ul>
 
                     <b>3.ĐỊA ĐIỂM LÀM VIỆC</b>
                     <ul className="tuyendung-noidung">
-                        <li>P. Nguyễn Trác, Yên Nghĩa, Hà Đông, Hà Nội</li>
+                        <li>Văn phòng Creative Hub - Khu đô thị Dương Nội, Hà Đông, Hà Nội.</li>
+                        <li>Có thể làm việc từ xa 2 ngày/tuần khi đạt KPI ổn định.</li>
                     </ul>
 
                     <b>4.YÊU CẦU</b>
                     <ul className="tuyendung-noidung">
-                        <li>Nam/Nữ, tuổi từ 18 - 25.</li>
-                        <li>Tính cách hòa đồng, thân thiện, niềm nở.</li>
+                        <li>Tốt nghiệp Cao đẳng/Đại học chuyên ngành Marketing, Truyền thông hoặc ngành liên quan.</li>
+                        <li>Viết tiếng Việt tốt, có khả năng kể chuyện và trình bày logic.</li>
                         <li>
-                            Có kỹ năng giao tiếp, thuyết phục, đàm phán tốt với khách hàng.
+                            Có tư duy nội dung theo mục tiêu kinh doanh, không chỉ dừng ở viết mô tả.
                         </li>
-                        <li>Kiên trì, năng động, trung thực, nhiệt tình.</li>
+                        <li>Biết dùng Canva hoặc công cụ chỉnh sửa cơ bản để phối hợp dựng nội dung nhanh.</li>
                         <li>
-                            Yêu thích công nghệ, giao tiếp, chăm sóc khách hàng. Ưu tiên các
-                            ứng viên đã làm việc tại các shop bán điện thoại, điện máy.
+                            Ưu tiên ứng viên có kinh nghiệm trong lĩnh vực công nghệ, điện tử hoặc thương mại điện tử.
                         </li>
-                        <li><span>Số lượng cần tuyển: 02 nhân sự</span></li>
+                        <li><span>Số lượng cần tuyển: 03 nhân sự</span></li>
                     </ul>
 
                     <b>5.KỸ NĂNG ƯU TIÊN</b>
                     <ul className="tuyendung-noidung">
-                        <li>Biết sử dụng mạng xã hội cơ bản để hỗ trợ tư vấn và chăm sóc khách.</li>
-                        <li>Có khả năng chụp ảnh/quay video sản phẩm là một lợi thế.</li>
-                        <li>Ưu tiên ứng viên có thể làm việc ổn định tối thiểu 6 tháng.</li>
+                        <li>Có khả năng viết theo nhiều tone giọng: chuyên gia, gần gũi, bán hàng.</li>
+                        <li>Đã từng vận hành nội dung cho TikTok, Facebook Reels hoặc YouTube Shorts.</li>
+                        <li>Biết đọc các chỉ số cơ bản trên Meta, Google Analytics là lợi thế.</li>
+                        <li>Có portfolio hoặc bài mẫu đính kèm khi ứng tuyển.</li>
                     </ul>
 
                     <b>6.QUYỀN LỢI</b>
                     <ul className="tuyendung-noidung">
-                        <li>Thu nhập: <span>5.000.000 - 7.000.000 VNĐ/tháng</span>.</li>
-                        <li>Hoa hồng hưởng theo doanh thu bán hàng của cửa hàng.</li>
-                        <li>Thưởng thêm theo tăng trưởng cửa hàng.</li>
-                        <li>
-                            Phụ cấp, thưởng thêm theo chế độ công ty (Làm thêm, gửi xe, sinh
-                            nhật, Lễ tết….)
-                        </li>
-                        <li>Hưởng đầy đủ các chính sách theo luật lao động.</li>
-                        <li>Được đào tạo về chuyên môn & kỹ năng trước khi làm việc.</li>
-                        <li>
-                            Được tiếp xúc với những sản phẩm công nghệ mới nhất hiện nay.
-                        </li>
+                        <li>Mức lương cứng: <span>12.000.000 - 18.000.000 VNĐ/tháng</span> tùy năng lực.</li>
+                        <li>Thưởng KPI theo quý từ 1 - 3 tháng lương.</li>
+                        <li>Ngân sách học tập 5.000.000 VNĐ/năm cho các khóa kỹ năng chuyên môn.</li>
+                        <li>Trang bị laptop làm việc, phụ cấp gửi xe và ăn trưa.</li>
+                        <li>Bảo hiểm đầy đủ, 12 ngày phép/năm và thêm 1 ngày nghỉ sinh nhật.</li>
+                        <li>Tham gia team building, workshop công nghệ và ngày Demo nội bộ hàng tháng.</li>
                     </ul>
 
                     <b>7.QUY TRÌNH ỨNG TUYỂN</b>
                     <ul className="tuyendung-noidung">
-                        <li>Điền biểu mẫu hoặc gửi CV theo thông tin liên hệ bên dưới.</li>
-                        <li>Bộ phận tuyển dụng sẽ liên hệ trong vòng 3 - 5 ngày làm việc.</li>
-                        <li>Phỏng vấn 1 vòng trực tiếp tại cửa hàng.</li>
+                        <li>Gửi CV + portfolio về email tuyển dụng bên dưới.</li>
+                        <li>Vòng 1: Screening hồ sơ trong 48 giờ làm việc.</li>
+                        <li>Vòng 2: Bài test viết nội dung ngắn (45 phút, online).</li>
+                        <li>Vòng 3: Phỏng vấn chuyên môn và trao đổi offer.</li>
                     </ul>
 
                     <b>8.LIÊN HỆ</b>
                     <ul className="tuyendung-noidung">
                         <li>
-                            Ứng viên điền thông tin theo link:
-                            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdIYTjN3l4VwkFYiQyNqkhD465Ussl-BTHCzU8p5sd1Ne-7iQ/viewform?usp=sf_link"
-                            >
-                                <span>Tuyển dụng</span>
+                            Nộp hồ sơ nhanh tại form:
+                            <a href="https://forms.gle/3k9fV3R9x2MContentLab">
+                                <span>Ứng tuyển ngay</span>
                             </a>
                         </li>
                         <li>
-                            Hoặc nộp hồ sơ trực tiếp tại
-                            <b>P. Nguyễn Trác, Yên Nghĩa, Hà Đông, Hà Nội</b>
+                            Email: <b>talent@thegioicongnghe.vn</b> (tiêu đề: [Content] Họ tên)
                         </li>
-                        <li>Hoặc gửi CV qua email: <b>hr@thegioicongnghe.vn</b></li>
-                        <li>Hotline tuyển dụng: <b>0123 456 789</b> (08:30 - 17:30)</li>
+                        <li>Hotline tuyển dụng: <b>0899 668 225</b> (09:00 - 18:00, Thứ 2 - Thứ 6)</li>
+                        <li>Địa chỉ văn phòng: <b>Creative Hub, Hà Đông, Hà Nội</b></li>
                     </ul>
                 </div>
             </div>
@@ -325,24 +326,23 @@ const GioiThieu = () => {
                 <h4 className="page-header"><b>Giới thiệu</b></h4>
                 <div className="page-info">
                     <p>
-                        Chúng tôi luôn đem lại cho khách hàng sự hài lòng và thỏa mãn với
-                        tất cả các sản phẩm của mình.<br />
-                        Bên cạnh đó là đội ngũ nhân viên nhiệt tình chu đáo và đầy kinh
-                        nghiệm của chúng tôi luôn đưa được ra cho khách hàng những thông tin
-                        có giá trị và giúp khách hàng lựa chọn được những sản phẩm phù hợp
-                        nhất.<br />
-                        Để nâng cao thương hiệu của mình, mục tiêu của chúng tôi trong thời
-                        gian tới là cung cấp đến tận tay khách hàng những sản phẩm chính
-                        hãng với chất lượng đảm bảo và uy tín cũng như giá cả hợp lý
-                        nhất.<br />
-                        Chúng tôi mong muốn sự đóng góp của khách hàng sẽ giúp chúng tôi
-                        ngày một phát triển để từ đó củng cố thêm lòng tin của khách hàng
-                        với chúng tôi. Chúng tôi rất biết ơn sự tin tưởng của khách hàng
-                        trong suốt gần 10 năm qua và chúng tôi luôn tâm niệm rằng cần phải
-                        cố gắng hơn nữa để xứng đáng với phương châm đề ra “Nếu những gì
-                        chúng tôi không có, nghĩa là bạn không cần .<br />
-                        Chúng tôi xin chân thành cảm ơn tất cả các khách hàng đã, đang và sẽ
-                        ủng hộ chúng tôi.
+                        Chúng tôi xây dựng Thế Giới Công Nghệ như một hệ sinh thái mua sắm
+                        thiết bị thông minh dành cho người dùng hiện đại: nhanh, minh bạch
+                        và cá nhân hóa theo nhu cầu thực tế.<br />
+                        Không chỉ bán sản phẩm, đội ngũ của chúng tôi tập trung vào trải nghiệm
+                        trọn vòng đời: tư vấn đúng nhu cầu, hỗ trợ thiết lập ban đầu, bảo hành
+                        rõ ràng và đồng hành trong suốt quá trình sử dụng.<br />
+                        Mỗi sản phẩm trước khi lên kệ đều được kiểm tra nguồn gốc, chính sách
+                        hậu mãi và chất lượng vận hành để đảm bảo khách hàng nhận đúng giá trị
+                        đã cam kết.<br />
+                        Chúng tôi đầu tư liên tục vào nội dung hướng dẫn, review thực tế và
+                        dịch vụ chăm sóc sau bán để khách hàng có thể ra quyết định dễ dàng
+                        ngay cả khi chưa am hiểu sâu về công nghệ.<br />
+                        Trong giai đoạn phát triển mới, mục tiêu của chúng tôi là trở thành
+                        điểm đến tin cậy cho mọi nhu cầu công nghệ cá nhân và gia đình, với
+                        chuẩn phục vụ ngày càng chuyên nghiệp, linh hoạt và tử tế.<br />
+                        Cảm ơn bạn đã tin tưởng lựa chọn Thế Giới Công Nghệ. Sự hài lòng của
+                        bạn là tiêu chuẩn vận hành quan trọng nhất của chúng tôi mỗi ngày.
                     </p>
                 </div>
             </div>
@@ -377,15 +377,15 @@ const BaoHanh = () => {
                             <td colSpan="4" className="header-table">
 
                                 <div className="marquee-title">
-                                    CÁC TRUNG TÂM BẢO HÀNH CỦA THẾ GIỚI CÔNG NGHỆ
+                                    HỆ THỐNG TRUNG TÂM HỖ TRỢ & BẢO HÀNH THẾ GIỚI CÔNG NGHỆ
                                 </div>
                             </td>
                         </tr>
                         <tr style={{ height: "40px" }}>
                             <th>STT</th>
-                            <th>Địa chỉ</th>
-                            <th>Điện thoại</th>
-                            <th>Thời gian làm việc</th>
+                            <th>Trung tâm / Địa chỉ</th>
+                            <th>Hotline hỗ trợ</th>
+                            <th>Giờ tiếp nhận</th>
                         </tr>
                     </thead>
                     {centers.map((center, index) => (
@@ -404,7 +404,7 @@ const BaoHanh = () => {
                             <td>
                                 {center.open_time && center.close_time
                                     ? `${center.open_time} - ${center.close_time}`
-                                    : '8h00 - 17h00'}
+                                    : '08:30 - 17:30'}
                             </td>
                         </tr>
                     ))}
@@ -426,26 +426,27 @@ const LienHe = () => {
                     <div className="info-left">
                         <h2> <b>CÔNG TY CỔ PHẦN THẾ GIỚI CÔNG NGHỆ</b> </h2><br />
                         <p>
-                            <b>Địa chỉ:</b> P. Nguyễn Trác, Yên Nghĩa, Hà Đông, Hà Nội<br />
-                            <b>Telephone:</b> 0123456789<br />
-                            <b>Hotline:</b> 0123456789 - CSKH: 0123456789<br />
-                            <b>Website:</b> <a href="https://github.com/Linh21010581">Github</a> <br />
-                            <b>E-mail:</b> abc@gmail.com<br />
-                            <b>Mã số thuế:</b> 99 99 99 99 99<br />
-                            <b>Tài khoản ngân hàng :</b><br />
-                            <b>Số TK:</b> 000000000000 <br />
-                            <b>Tại Ngân hàng:</b> MB bank <br /><br />
-                            Quý khách có thể gửi phản hồi hoạc đóng góp tới chúng tôi bằng <a href="https://docs.google.com/forms/d/e/1FAIpQLSdIYTjN3l4VwkFYiQyNqkhD465Ussl-BTHCzU8p5sd1Ne-7iQ/viewform?usp=sf_link"
+                            <b>Trụ sở chính:</b> Tòa nhà FreeLand Hub, KĐT Dương Nội, Hà Đông, Hà Nội<br />
+                            <b>Điện thoại:</b> 024 7108 8899<br />
+                            <b>Hotline bán hàng:</b> 0899 668 225<br />
+                            <b>Hotline CSKH:</b> 1900 63 66 82<br />
+                            <b>Website:</b> <a href="https://freelandtech.vn">freelandtech.vn</a> <br />
+                            <b>E-mail:</b> hello@freelandtech.vn<br />
+                            <b>Mã số thuế:</b> 0109 888 321<br />
+                            <b>Tài khoản ngân hàng:</b><br />
+                            <b>Số TK:</b> 0888668225 <br />
+                            <b>Tại Ngân hàng:</b> MB Bank - CN Hà Đông <br /><br />
+                            Bạn có thể gửi phản hồi, góp ý hoặc đề xuất hợp tác qua <a href="https://forms.gle/Za9sXhY8Q9fR4vQG7"
                             >
-                                <b>Biểu mẫu này</b>
+                                <b>biểu mẫu liên hệ trực tuyến</b>
                             </a> . Chúng tôi
-                            sẽ phản hồi thông tin qua email của quý khách. Hân hạnh phục vụ và chân thành
-                            cảm ơn sự quan tâm, đóng góp ý kiến đến Thế giới công nghệ.
+                            sẽ phản hồi trong vòng 24 giờ làm việc qua email hoặc số điện thoại bạn để lại.
+                            Thế giới công nghệ luôn trân trọng mọi góp ý để cải thiện sản phẩm và dịch vụ mỗi ngày.
                         </p>
                     </div>
                     <div className="info-right">
                         <iframe width="100%" height="450" title="Map"
-                            src="https://maps.google.com/maps?width=100%&amp;height=450&amp;hl=en&amp;q=Trường%20đại%20học%20Phenikaa%20P.%20Nguyễn%20Trác,%20Yên%20Nghĩa,%20Hà%20Đông,%20Hà%20Nội&amp;ie=UTF8&amp;t=&amp;z=16&amp;iwloc=B&amp;output=embed"
+                            src="https://maps.google.com/maps?width=100%&amp;height=450&amp;hl=vi&amp;q=Khu%20%C4%91%C3%B4%20th%E1%BB%8B%20D%C6%B0%C6%A1ng%20N%E1%BB%99i,%20H%C3%A0%20%C4%90%C3%B4ng,%20H%C3%A0%20N%E1%BB%99i&amp;ie=UTF8&amp;t=&amp;z=15&amp;iwloc=B&amp;output=embed"
                             frameBorder="0" scrolling="no" marginHeight="0" marginWidth="0">
                             <a href="https://www.maps.ie/create-google-map/">Embed Google Map</a>
                         </iframe>

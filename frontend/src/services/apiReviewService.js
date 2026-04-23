@@ -48,11 +48,21 @@ const updateReviewActiveStatus = (id, is_active) => {
     });
 };
 
+const createAdminReview = (product_id, rating, comment, user_id) => {
+    return axios.post(`api/review/admin-create`, {
+        product_id,
+        rating,
+        comment,
+        user_id
+    });
+};
+
 export {
     getAllReviewsWithPaginate,
     replyToReview,
     updateAdminReply,
     deleteAdminReply,
     deleteUserReview,
-    updateReviewActiveStatus
+    updateReviewActiveStatus,
+    createAdminReview
 };

@@ -1,5 +1,6 @@
 const connection = require("../config/database");
 const dayjs = require('dayjs');
+const { getReviewSummaryByProductId, generateAndSaveSummary } = require("../services/reviewSummaryService");
 
 
 function calculateAverageRating(reviews) {
@@ -1109,6 +1110,71 @@ const getProductReviewsPaginate = async (req, res) => {
         );
         const total_reply = reviewList.length;
 
+        let summaryRow = await getReviewSummaryByProductId(productId);
+        if (!summaryRow && total_reviews > 0) {
+            try {
+                await generateAndSaveSummary(productId);
+                summaryRow = await getReviewSummaryByProductId(productId);
+            } catch (summaryErr) {
+                console.error("Không thể tạo summary ngay tại request:", summaryErr.message);
+            }
+        }
+
+        const isLegacySummary = (text) => {
+            const t = String(text || "");
+            return /Khách hàng nhìn chung đánh giá rất tích cực|Nhận xét mới nổi bật:/i.test(t);
+        };
+
+        if (summaryRow && isLegacySummary(summaryRow.summary_text) && total_reviews > 0) {
+            try {
+                await generateAndSaveSummary(productId);
+                summaryRow = await getReviewSummaryByProductId(productId);
+            } catch (summaryErr) {
+                console.error("Không thể regenerate legacy summary:", summaryErr.message);
+            }
+        }
+        let parsedHighlights = [];
+        let parsedRatingCounts = null;
+        const dedupeSummarySentences = (text) => {
+            const chunks = String(text || "")
+                .split(/(?<=[.!?])\s+|\n+/)
+                .map((x) => x.trim())
+                .filter(Boolean);
+            const seen = new Set();
+            const deduped = [];
+            for (const c of chunks) {
+                const key = c.toLowerCase();
+                if (seen.has(key)) continue;
+                seen.add(key);
+                deduped.push(c);
+            }
+            return deduped.join(" ").trim();
+        };
+
+        const cleanedSummaryText = summaryRow?.summary_text
+            ? dedupeSummarySentences(
+                String(summaryRow.summary_text)
+                .replace(/Điểm trung bình:\s*[\d.]+\/5\s*từ\s*\d+\s*lượt đánh giá\.?/gi, "")
+                .replace(/Nhận xét mới nổi bật:\s*/gi, "")
+                .replace(/\s{2,}/g, " ")
+                .trim()
+            )
+            : "";
+        if (summaryRow?.highlights) {
+            try {
+                parsedHighlights = JSON.parse(summaryRow.highlights);
+            } catch {
+                parsedHighlights = [];
+            }
+        }
+        if (summaryRow?.rating_counts) {
+            try {
+                parsedRatingCounts = JSON.parse(summaryRow.rating_counts);
+            } catch {
+                parsedRatingCounts = null;
+            }
+        }
+
         return res.status(200).json({
             EC: 0,
             EM: "Lấy review sản phẩm thành công",
@@ -1119,7 +1185,17 @@ const getProductReviewsPaginate = async (req, res) => {
                 total_parent_reviews,
                 rating_counts: ratingCounts,
                 reviews: parentReviews,
-                replies: replyReviews
+                replies: replyReviews,
+                ai_summary: summaryRow ? {
+                    summary_text: cleanedSummaryText,
+                    highlights: parsedHighlights,
+                    recommendation_percent: summaryRow.recommendation_percent,
+                    source: summaryRow.source,
+                    updated_at: summaryRow.updated_at,
+                    total_reviews: summaryRow.total_reviews,
+                    average_rating: Number(summaryRow.average_rating),
+                    rating_counts: parsedRatingCounts,
+                } : null
             }
         });
     } catch (error) {

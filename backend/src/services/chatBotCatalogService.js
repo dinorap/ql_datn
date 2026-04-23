@@ -69,6 +69,69 @@ function extractBrandHint(msg) {
     return null;
 }
 
+function extractPriceWindowHintVND(msg) {
+    const text = String(msg || "").toLowerCase().replace(/,/g, ".");
+    if (!text) return null;
+
+    // "10 tr", "10 triệu", "10m", "10000k"
+    const match = text.match(
+        /(\d+(?:\.\d+)?)\s*(trieu|triệu|tr|m|k|nghìn|nghin|ngàn|ngan)\b/i
+    );
+    if (!match) return null;
+
+    const value = parseFloat(match[1]);
+    if (!Number.isFinite(value) || value <= 0) return null;
+
+    const unit = match[2].toLowerCase();
+    let centerVND = 0;
+    if (unit === "k" || unit === "nghìn" || unit === "nghin" || unit === "ngàn" || unit === "ngan") {
+        centerVND = value * 1_000;
+    } else {
+        centerVND = value * 1_000_000;
+    }
+
+    // Yeu cau: +-2 trieu quanh moc gia user hoi.
+    const delta = 2_000_000;
+    return {
+        centerVND,
+        minVND: Math.max(0, Math.round(centerVND - delta)),
+        maxVND: Math.round(centerVND + delta),
+    };
+}
+
+function isProductInPriceWindow(product, priceWindow) {
+    if (!priceWindow) return true;
+    const pMin = Number(product?.gia_tu_san_pham_con_hang_VND ?? product?.gia_sau_uu_dai_neu_co);
+    const pMax = Number(product?.gia_den_san_pham_con_hang_VND ?? product?.gia_sau_uu_dai_neu_co);
+    if (!Number.isFinite(pMin) && !Number.isFinite(pMax)) return false;
+    const low = Number.isFinite(pMin) ? pMin : pMax;
+    const high = Number.isFinite(pMax) ? pMax : pMin;
+    // Giu san pham neu khoang gia cua no giao voi khoang user yeu cau.
+    return low <= priceWindow.maxVND && high >= priceWindow.minVND;
+}
+
+function hasPhoneIntent(msg) {
+    const text = String(msg || "").toLowerCase();
+    return /\b(điện thoại|dien thoai|smartphone|\bdt\b|\bđt\b|iphone|galaxy|xiaomi|oppo|vivo|realme)\b/i.test(
+        text
+    );
+}
+
+function hasTopSellingIntent(msg) {
+    const text = String(msg || "").toLowerCase();
+    return /\b(hot|bán chạy|ban chay|best seller|mua nhiều|mua nhieu|nổi bật|noi bat)\b/i.test(
+        text
+    );
+}
+
+function isLikelyPhoneProduct(product) {
+    const text = String(product?.ten || "").toLowerCase();
+    if (!text) return false;
+    // Loai cac tu khoa tablet de tranh goi y sai intent "dien thoai".
+    if (/\b(ipad|tablet|tab|pad)\b/i.test(text)) return false;
+    return true;
+}
+
 async function loadPromoTypeMap() {
     const [promotionTypes] = await connection.query(`SELECT * FROM promotion_types`);
     const map = {};
@@ -167,6 +230,247 @@ async function queryProductsRows(likePattern, limit) {
             likePattern,
             limit,
         ]
+    );
+    return rows;
+}
+
+async function queryProductsByPriceWindow(minVND, maxVND, limit, phoneOnly) {
+    const [rows] = await connection.query(
+        `
+        SELECT
+            p.id AS product_id,
+            p.name AS product_name,
+            p.product_code,
+            p.screen,
+            p.cpu,
+            p.battery,
+            LEFT(p.description, 600) AS description_excerpt,
+            c.name AS company_name,
+            v.id AS variant_id,
+            v.color,
+            v.base_price,
+            pr.discount_value,
+            pr.promotion_type_id,
+            pt.name AS promotion_type_name,
+            pt.code AS promotion_code,
+            COALESCE(
+                (
+                    SELECT SUM(vo.stock_quantity)
+                    FROM product_variants pv2
+                    JOIN product_variant_options vo ON vo.variant_id = pv2.id
+                    WHERE pv2.product_id = p.id
+                ),
+                0
+            ) AS total_stock,
+            (
+                SELECT MIN(pv3.base_price + COALESCE(vo3.extra_price, 0))
+                FROM product_variants pv3
+                JOIN product_variant_options vo3
+                    ON vo3.variant_id = pv3.id AND vo3.stock_quantity > 0
+                WHERE pv3.product_id = p.id
+            ) AS min_price_in_stock
+        FROM products p
+        LEFT JOIN companies c ON c.id = p.company_id
+        JOIN (
+            SELECT v1.*
+            FROM product_variants v1
+            INNER JOIN (
+                SELECT product_id, MIN(id) AS min_variant_id
+                FROM product_variants
+                GROUP BY product_id
+            ) AS min_v ON v1.product_id = min_v.product_id AND v1.id = min_v.min_variant_id
+        ) v ON p.id = v.product_id
+        LEFT JOIN (
+            SELECT pr1.*
+            FROM promotions pr1
+            INNER JOIN (
+                SELECT variant_id, MAX(start_date) AS max_start
+                FROM promotions
+                WHERE end_date > NOW()
+                GROUP BY variant_id
+            ) latest ON pr1.variant_id = latest.variant_id AND pr1.start_date = latest.max_start
+        ) pr ON v.id = pr.variant_id AND pr.end_date > NOW()
+        LEFT JOIN promotion_types pt ON pr.promotion_type_id = pt.id
+        WHERE
+            p.is_active = 1
+            AND (
+                (
+                    SELECT MIN(pv3.base_price + COALESCE(vo3.extra_price, 0))
+                    FROM product_variants pv3
+                    JOIN product_variant_options vo3
+                        ON vo3.variant_id = pv3.id AND vo3.stock_quantity > 0
+                    WHERE pv3.product_id = p.id
+                ) BETWEEN ? AND ?
+            )
+            AND (
+                ? = 0 OR EXISTS (
+                    SELECT 1
+                    FROM product_categories pc
+                    WHERE pc.id = p.category_id
+                      AND (
+                        LOWER(pc.name) LIKE '%điện thoại%'
+                        OR LOWER(pc.name) LIKE '%dien thoai%'
+                        OR LOWER(pc.name) LIKE '%phone%'
+                      )
+                )
+            )
+        ORDER BY min_price_in_stock ASC, p.id DESC
+        LIMIT ?
+        `,
+        [minVND, maxVND, phoneOnly ? 1 : 0, limit]
+    );
+    return rows;
+}
+
+async function queryLatestActiveProducts(limit) {
+    const [rows] = await connection.query(
+        `
+        SELECT
+            p.id AS product_id,
+            p.name AS product_name,
+            p.product_code,
+            p.screen,
+            p.cpu,
+            p.battery,
+            LEFT(p.description, 600) AS description_excerpt,
+            c.name AS company_name,
+            v.id AS variant_id,
+            v.color,
+            v.base_price,
+            pr.discount_value,
+            pr.promotion_type_id,
+            pt.name AS promotion_type_name,
+            pt.code AS promotion_code,
+            COALESCE(
+                (
+                    SELECT SUM(vo.stock_quantity)
+                    FROM product_variants pv2
+                    JOIN product_variant_options vo ON vo.variant_id = pv2.id
+                    WHERE pv2.product_id = p.id
+                ),
+                0
+            ) AS total_stock,
+            (
+                SELECT MIN(pv3.base_price + COALESCE(vo3.extra_price, 0))
+                FROM product_variants pv3
+                JOIN product_variant_options vo3
+                    ON vo3.variant_id = pv3.id AND vo3.stock_quantity > 0
+                WHERE pv3.product_id = p.id
+            ) AS min_price_in_stock
+        FROM products p
+        LEFT JOIN companies c ON c.id = p.company_id
+        JOIN (
+            SELECT v1.*
+            FROM product_variants v1
+            INNER JOIN (
+                SELECT product_id, MIN(id) AS min_variant_id
+                FROM product_variants
+                GROUP BY product_id
+            ) AS min_v ON v1.product_id = min_v.product_id AND v1.id = min_v.min_variant_id
+        ) v ON p.id = v.product_id
+        LEFT JOIN (
+            SELECT pr1.*
+            FROM promotions pr1
+            INNER JOIN (
+                SELECT variant_id, MAX(start_date) AS max_start
+                FROM promotions
+                WHERE end_date > NOW()
+                GROUP BY variant_id
+            ) latest ON pr1.variant_id = latest.variant_id AND pr1.start_date = latest.max_start
+        ) pr ON v.id = pr.variant_id AND pr.end_date > NOW()
+        LEFT JOIN promotion_types pt ON pr.promotion_type_id = pt.id
+        WHERE p.is_active = 1
+        ORDER BY p.id DESC
+        LIMIT ?
+        `,
+        [limit]
+    );
+    return rows;
+}
+
+async function queryTopSellingRows(limit, phoneOnly) {
+    const [rows] = await connection.query(
+        `
+        SELECT
+            p.id AS product_id,
+            p.name AS product_name,
+            p.product_code,
+            p.screen,
+            p.cpu,
+            p.battery,
+            LEFT(p.description, 600) AS description_excerpt,
+            c.name AS company_name,
+            v.id AS variant_id,
+            v.color,
+            v.base_price,
+            pr.discount_value,
+            pr.promotion_type_id,
+            pt.name AS promotion_type_name,
+            pt.code AS promotion_code,
+            COALESCE(
+                (
+                    SELECT SUM(vo.stock_quantity)
+                    FROM product_variants pv2
+                    JOIN product_variant_options vo ON vo.variant_id = pv2.id
+                    WHERE pv2.product_id = p.id
+                ),
+                0
+            ) AS total_stock,
+            (
+                SELECT MIN(pv3.base_price + COALESCE(vo3.extra_price, 0))
+                FROM product_variants pv3
+                JOIN product_variant_options vo3
+                    ON vo3.variant_id = pv3.id AND vo3.stock_quantity > 0
+                WHERE pv3.product_id = p.id
+            ) AS min_price_in_stock,
+            ts.total_sold
+        FROM (
+            SELECT oi.product_id, SUM(oi.quantity) AS total_sold
+            FROM order_items oi
+            JOIN orders o ON oi.order_id = o.id
+            WHERE o.status_id = 4
+            GROUP BY oi.product_id
+            ORDER BY total_sold DESC, oi.product_id DESC
+            LIMIT ?
+        ) ts
+        JOIN products p ON p.id = ts.product_id AND p.is_active = 1
+        LEFT JOIN companies c ON c.id = p.company_id
+        JOIN (
+            SELECT v1.*
+            FROM product_variants v1
+            INNER JOIN (
+                SELECT product_id, MIN(id) AS min_variant_id
+                FROM product_variants
+                GROUP BY product_id
+            ) AS min_v ON v1.product_id = min_v.product_id AND v1.id = min_v.min_variant_id
+        ) v ON p.id = v.product_id
+        LEFT JOIN (
+            SELECT pr1.*
+            FROM promotions pr1
+            INNER JOIN (
+                SELECT variant_id, MAX(start_date) AS max_start
+                FROM promotions
+                WHERE end_date > NOW()
+                GROUP BY variant_id
+            ) latest ON pr1.variant_id = latest.variant_id AND pr1.start_date = latest.max_start
+        ) pr ON v.id = pr.variant_id AND pr.end_date > NOW()
+        LEFT JOIN promotion_types pt ON pr.promotion_type_id = pt.id
+        WHERE (
+            ? = 0 OR EXISTS (
+                SELECT 1
+                FROM product_categories pc
+                WHERE pc.id = p.category_id
+                  AND (
+                    LOWER(pc.name) LIKE '%điện thoại%'
+                    OR LOWER(pc.name) LIKE '%dien thoai%'
+                    OR LOWER(pc.name) LIKE '%phone%'
+                  )
+            )
+        )
+        ORDER BY ts.total_sold DESC, p.id DESC
+        LIMIT ?
+        `,
+        [limit * 4, phoneOnly ? 1 : 0, limit]
     );
     return rows;
 }
@@ -363,10 +667,13 @@ function shapeProduct(row, promoTypeMap) {
  */
 async function getCatalogContextForMessage(searchText) {
     const promoTypeMap = await loadPromoTypeMap();
+    const priceWindow = extractPriceWindowHintVND(searchText);
+    const hotIntent = hasTopSellingIntent(searchText);
     const candidates = buildSearchCandidates(searchText).sort(
         (a, b) => b.length - a.length
     );
     const byId = new Map();
+    const phoneIntent = hasPhoneIntent(searchText);
 
     for (const term of candidates) {
         const safe = sanitizeLikeFragment(term);
@@ -381,7 +688,7 @@ async function getCatalogContextForMessage(searchText) {
         if (byId.size >= 10) break;
     }
 
-    const matches = [...byId.values()].slice(0, 10);
+    let matches = [...byId.values()].slice(0, 10);
     let similar = [];
     let similarReason = null;
 
@@ -543,6 +850,79 @@ async function getCatalogContextForMessage(searchText) {
     await enrichProductsWithCorrectPricing(matches, promoTypeMap);
     await enrichProductsWithCorrectPricing(similar, promoTypeMap);
     await enrichProductsWithCorrectPricing(stockAlternatives, promoTypeMap);
+
+    // Neu user hoi "tam X trieu", loc theo khoang +-2 trieu.
+    if (priceWindow) {
+        matches = matches.filter((p) => isProductInPriceWindow(p, priceWindow));
+        similar = similar.filter((p) => isProductInPriceWindow(p, priceWindow));
+        stockAlternatives = stockAlternatives.filter((p) =>
+            isProductInPriceWindow(p, priceWindow)
+        );
+
+        // Neu hoi theo budget ma sau loc bi rong, truy van truc tiep theo khoang gia.
+        if (matches.length === 0) {
+            const budgetRows = await queryProductsByPriceWindow(
+                priceWindow.minVND,
+                priceWindow.maxVND,
+                12,
+                phoneIntent
+            );
+            matches = budgetRows.map((r) => shapeProduct(r, promoTypeMap)).slice(0, 10);
+            await enrichProductsWithCorrectPricing(matches, promoTypeMap);
+            matches = matches.filter((p) => isProductInPriceWindow(p, priceWindow));
+        }
+
+        if (matches.length === 0 && similarReason) {
+            similarReason = `${similarReason} Đã lọc theo khoảng giá ${priceWindow.minVND.toLocaleString("vi-VN")} - ${priceWindow.maxVND.toLocaleString("vi-VN")} VND.`;
+        }
+    }
+
+    // Neu user hoi dien thoai, loai cac goi y tablet/pad.
+    if (phoneIntent) {
+        matches = matches.filter(isLikelyPhoneProduct);
+        similar = similar.filter(isLikelyPhoneProduct);
+        stockAlternatives = stockAlternatives.filter(isLikelyPhoneProduct);
+    }
+
+    // Khoi "cuu canh" cho query budget: loc truc tiep tu DB theo gia sau uu dai.
+    // Muc tieu: neu user hoi dien thoai tam 15tr thi phai ra dung dien thoai 13-17tr.
+    if (priceWindow) {
+        const budgetPoolRows = await queryLatestActiveProducts(220);
+        let budgetPool = budgetPoolRows.map((r) => shapeProduct(r, promoTypeMap));
+        await enrichProductsWithCorrectPricing(budgetPool, promoTypeMap);
+
+        budgetPool = budgetPool.filter((p) => !p.het_hang);
+        if (phoneIntent) {
+            budgetPool = budgetPool.filter(isLikelyPhoneProduct);
+        }
+        budgetPool = budgetPool.filter((p) => isProductInPriceWindow(p, priceWindow));
+
+        if (budgetPool.length > 0) {
+            matches = budgetPool.slice(0, 10);
+            similar = [];
+            stockAlternatives = [];
+            similarReason = null;
+        }
+    }
+
+    if (hotIntent) {
+        const hotRows = await queryTopSellingRows(8, phoneIntent);
+        let hotProducts = hotRows.map((r) => {
+            const p = shapeProduct(r, promoTypeMap);
+            p.da_ban = Number(r.total_sold || 0);
+            return p;
+        });
+        await enrichProductsWithCorrectPricing(hotProducts, promoTypeMap);
+        if (phoneIntent) {
+            hotProducts = hotProducts.filter(isLikelyPhoneProduct);
+        }
+        if (hotProducts.length > 0) {
+            matches = hotProducts.slice(0, 8);
+            similar = [];
+            stockAlternatives = [];
+            similarReason = "Danh sách bán chạy dựa trên số lượng đơn đã hoàn tất (status_id = 4).";
+        }
+    }
 
     return {
         matches,

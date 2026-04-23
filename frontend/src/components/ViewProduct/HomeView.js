@@ -244,7 +244,7 @@ const TopProductSection = ({ categoryId, title, background, link, sideBannerType
                     </div>
                 </div>
                 <div className="see-more">
-                    <Link to={link_k}>Xem thêm {title.toLowerCase()} <IoIosArrowDown />  </Link>
+                    <Link to={link_k}>Xem tất cả {title.toLowerCase()} <IoIosArrowDown />  </Link>
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Progress, Rate, Button, Input, Pagination, Avatar } from 'antd';
-import { StarFilled, CloseOutlined } from '@ant-design/icons';
+import { StarFilled, CloseOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import './ReviewSection.scss';
 import RatingModal from './RatingModal';
 import { toast } from "react-toastify";
@@ -30,11 +30,13 @@ const ReviewSection = ({ product_id, name, primary_image }) => {
         total_reply: 0,
         rating_counts: {},
         reviews: [],
-        replies: []
+        replies: [],
+        ai_summary: null
     });
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(5);
     const [loading, setLoading] = useState(false);
+    const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
 
     const ratingLevels = [5, 4, 3, 2, 1];
     const [canReview, setCanReview] = useState(false);
@@ -73,6 +75,10 @@ const ReviewSection = ({ product_id, name, primary_image }) => {
         fetchReview(1, filterRating);
     }, [product_id, filterRating]);
 
+    useEffect(() => {
+        setIsSummaryExpanded(false);
+    }, [product_id, reviewData.ai_summary?.updated_at]);
+
     const handlePageChange = (page) => {
         setCurrentPage(page);
         fetchReview(page, filterRating);
@@ -84,6 +90,11 @@ const ReviewSection = ({ product_id, name, primary_image }) => {
     };
 
     const filteredReviews = reviewData.reviews;
+    const aiSummary = reviewData.ai_summary;
+    const shortSummary = aiSummary?.summary_text
+        ? aiSummary.summary_text.slice(0, 420)
+        : "";
+    const canExpandSummary = aiSummary?.summary_text && aiSummary.summary_text.length > 420;
 
     const hasRated = reviewData.reviews.some(
         r => r.user_id === account?.id && r.rating !== null && r.parent_id === null
@@ -179,6 +190,52 @@ const ReviewSection = ({ product_id, name, primary_image }) => {
                     </div>
 
                 </div>
+
+                {aiSummary?.summary_text ? (
+                    <div className="ai-review-summary">
+                        <div className="ai-summary-headline">
+                            <div className="ai-summary-rating-line">
+                                <strong>{reviewData.average_rating}</strong>
+                                <span className="ai-summary-star">★</span>
+                                <span>Đánh Giá Sản Phẩm ({reviewData.total_reviews})</span>
+                            </div>
+                        </div>
+
+                        <div className="ai-summary-box">
+                            <div className="ai-summary-header">
+                                <div className="ai-summary-title">Tóm tắt đánh giá sản phẩm ✨</div>
+                                <InfoCircleOutlined className="ai-summary-info" />
+                            </div>
+
+                            <div className="ai-summary-content">
+                                {isSummaryExpanded || !canExpandSummary ? aiSummary.summary_text : `${shortSummary}...`}
+                            </div>
+
+                            {Array.isArray(aiSummary.highlights) && aiSummary.highlights.length > 0 && (
+                                <div className="ai-summary-highlights">
+                                    {aiSummary.highlights.slice(0, 2).map((item, idx) => (
+                                        <div key={`${item}-${idx}`} className="ai-highlight-item">• {item}</div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="ai-summary-footer">
+                                {canExpandSummary && (
+                                    <button
+                                        type="button"
+                                        className="ai-summary-toggle"
+                                        onClick={() => setIsSummaryExpanded((prev) => !prev)}
+                                    >
+                                        {isSummaryExpanded ? "Thu gọn" : "Xem thêm"}
+                                    </button>
+                                )}
+                                <div className="ai-summary-recommend">
+                                    Hữu ích: {aiSummary.recommendation_percent}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : null}
 
 
                 <div className="review-filter-row">

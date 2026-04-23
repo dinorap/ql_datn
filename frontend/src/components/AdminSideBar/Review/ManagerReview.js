@@ -5,6 +5,7 @@ import ModalDeleteReview from "./ModalDeleteReview";
 import TableReview from "./TableReview";
 import { getAllReviewsWithPaginate } from "../../../services/apiReviewService";
 import ModalDeleteReply from "./ModalDeleteReply";
+import ModalCreateReview from "./ModalCreateReview";
 const LIMIT = 10
 const ManagerReview = () => {
     useEffect(() => {
@@ -23,6 +24,7 @@ const ManagerReview = () => {
     const [showModalUpdate, setShowModalUpdate] = useState(false)
     const [showModalDel, setShowModalDel] = useState(false)
     const [showModalDelReply, setShowModalDelReply] = useState(false)
+    const [showModalCreateReview, setShowModalCreateReview] = useState(false)
 
     const fetchListWithPaginate = async (page, searchType, searchTerm) => {
         let res = await getAllReviewsWithPaginate(page, LIMIT, searchType, searchTerm)
@@ -65,6 +67,7 @@ const ManagerReview = () => {
                 pageCount={pageCount}
                 rowCount={rowCount}
                 currentPage={currentPage}
+                onOpenCreateReview={() => setShowModalCreateReview(true)}
             />
             <ModalReplyReview
                 show={showModalCreate}
@@ -98,6 +101,12 @@ const ManagerReview = () => {
                 fetchListWithPaginate={fetchListWithPaginate}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
+            />
+            <ModalCreateReview
+                show={showModalCreateReview}
+                setShow={setShowModalCreateReview}
+                fetchListWithPaginate={fetchListWithPaginate}
+                currentPage={currentPage}
             />
         </>
     )

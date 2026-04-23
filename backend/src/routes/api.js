@@ -6,7 +6,7 @@ const { chatBot } = require('../controllers/chatBotController')
 const authMiddleware = require("../middleware/authMiddleware"); // Sửa đúng đường dẫn middleware
 const { getNews, getAllNews, getNewsWithPaginate, deleteNews, createNews, updateNews } = require("../controllers/NewsController");
 const { getAllProductVariantsExpandFormat, deleteProduct, createProduct, updateProduct, createVariant, updateVariant, createOption, updateOption, updateProductActiveStatus, getBundledProductsByMainProductId, checkLowStock } = require("../controllers/ProductsController");
-const { getAllReviewsWithPaginate, replyToReview, updateAdminReply, deleteAdminReply, deleteUserReview, updateReviewActiveStatus } = require("../controllers/ReviewController");
+const { createAdminReview, getAllReviewsWithPaginate, replyToReview, updateAdminReply, deleteAdminReply, deleteUserReview, updateReviewActiveStatus } = require("../controllers/ReviewController");
 const { getAllPromotionTypesWithPaginate, createPromotionType, updatePromotionType, deletePromotionType, getAllPromotionType } = require("../controllers/PromotionController");
 const { updateUserProfile, updateUserPassword } = require("../controllers/ProfileController");
 const { updateOrderStatus, getAllOrders } = require("../controllers/OrderController");
@@ -72,6 +72,7 @@ router.put('/options/:id', authMiddleware, updateOption);
 router.put('/products', authMiddleware, updateProductActiveStatus);
 
 // Review Management APIs - Cần xác thực
+router.post('/review/admin-create', authMiddleware, createAdminReview)
 router.post('/review/reply', authMiddleware, replyToReview)
 router.put('/review/:id', authMiddleware, updateAdminReply)
 router.delete('/review/reply/:id', authMiddleware, deleteAdminReply)

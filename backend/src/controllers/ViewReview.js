@@ -1,4 +1,5 @@
 const connection = require("../config/database");
+const { enqueueReviewSummaryJob } = require("../services/reviewSummaryService");
 
 const createProductReview = async (req, res) => {
     const { product_id, user_id, rating, comment, parent_id = null } = req.body;
@@ -35,6 +36,10 @@ const createProductReview = async (req, res) => {
              VALUES (?, ?, ?, ?, ?, ?)`,
                 [product_id, user_id, rating || null, comment, parent_id, true]
             );
+        }
+
+        if (parent_id === null) {
+            await enqueueReviewSummaryJob(product_id, "review_created");
         }
 
         return res.json({ EC: 0, EM: rating ? "Gửi đánh giá thành công, chờ duyệt!" : "Bình luận đã được gửi!" });

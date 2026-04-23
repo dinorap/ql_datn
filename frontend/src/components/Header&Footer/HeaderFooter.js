@@ -844,7 +844,6 @@ const CoolPage = () => {
 
 
 const Footer = () => {
-    const { t } = useTranslation();
     return (
         <footer className="footer">
             <div className="footer__features">
@@ -852,13 +851,11 @@ const Footer = () => {
                     <div className="features-grid">
                         <div className="feature-item">
                             <div className="feature-icon">
-
                                 <img src="/svg/policy3.svg" alt="ok"></img>
-
                             </div>
                             <div className="feature-text">
-                                <h4>{t('brand_guarantee')}</h4>
-                                <p>{t('brand_description')}</p>
+                                <h4>Chính hãng 100%</h4>
+                                <p>Cam kết hoàn tiền nếu phát hiện hàng không chính hãng</p>
                             </div>
                         </div>
                         <div className="feature-item">
@@ -866,9 +863,8 @@ const Footer = () => {
                                 <img src="/svg/policy4.svg" alt="ok"></img>
                             </div>
                             <div className="feature-text">
-
-                                <h4>{t('easy_return')}</h4>
-                                <p>{t('easy_return_desc')}</p>
+                                <h4>Đổi trả dễ dàng</h4>
+                                <p>Đổi trả 1-1 trong 30 ngày cho lỗi kỹ thuật từ nhà sản xuất</p>
                             </div>
                         </div>
                         <div className="feature-item">
@@ -876,8 +872,8 @@ const Footer = () => {
                                 <img src="/svg/policy2.svg" alt="ok"></img>
                             </div>
                             <div className="feature-text">
-                                <h4>{t('quality_products')}</h4>
-                                <p>{t('quality_desc')}</p>
+                                <h4>Bảo hành rõ ràng</h4>
+                                <p>Tra cứu bảo hành online minh bạch theo IMEI/SN</p>
                             </div>
                         </div>
                         <div className="feature-item">
@@ -885,8 +881,8 @@ const Footer = () => {
                                 <img src="/svg/policy1.svg" alt="ok"></img>
                             </div>
                             <div className="feature-text">
-                                <h4>{t('delivery')}</h4>
-                                <p>{t('delivery_desc')}</p>
+                                <h4>Giao hàng nhanh</h4>
+                                <p>2 giờ nội thành - toàn quốc 24 đến 48 giờ</p>
                             </div>
                         </div>
                     </div>
@@ -895,10 +891,17 @@ const Footer = () => {
 
             <div className="footer__main">
                 <div className="container">
-
                     <div className="footer__middle">
                         <div className="footer__col">
-                            <h4>{t('connect_us')}</h4>
+                            <h4>THẾ GIỚI CÔNG NGHỆ</h4>
+                            <p className="footer-brand-text">
+                                Trải nghiệm mua sắm công nghệ theo chuẩn cao cấp: chính hãng, minh bạch,
+                                hỗ trợ tận tâm và giao hàng siêu tốc.
+                            </p>
+                            <div className="footer-badges">
+                                <span>Premium Tech Store</span>
+                                <span>Trusted Since 2016</span>
+                            </div>
                             <div className="social-links">
                                 <a href="https://www.facebook.com/" className="me-3" target="_blank" rel="noopener noreferrer">
                                     <FaFacebook className="contact" />
@@ -913,51 +916,34 @@ const Footer = () => {
                                     <FaYoutube className="contact" />
                                 </a>
                             </div>
+                        </div>
 
-                            <h4 className="mt-4">{t('hotline')}</h4>
+                        <div className="footer__col">
+                            <h4>Khám phá nhanh</h4>
+                            <ul className="footer-links">
+                                <li><NavLink to="/">Trang chủ flagship</NavLink></li>
+                                <li><NavLink to="/tintuc">Tạp chí công nghệ</NavLink></li>
+                                <li><NavLink to="/tuyendung">Sự nghiệp tại đây</NavLink></li>
+                                <li><NavLink to="/lienhe">Câu chuyện thương hiệu</NavLink></li>
+                                <li><a href="https://thegioicongnghe.vn/collections/vip">Bộ sưu tập VIP</a></li>
+                                <li><a href="https://thegioicongnghe.vn/deals/flash">Flash deals hôm nay</a></li>
+                            </ul>
+                        </div>
+
+                        <div className="footer__col">
+                            <h4>Hỗ trợ khách hàng</h4>
                             <div className="contact-info">
-                                <p>{t('consultation')}</p>
-                                <p><strong>1000.0000</strong> (Nhánh 1)</p>
-                                <p>{t('feedback')}</p>
-                                <p><strong>1111.1111</strong> (8h00 - 22h00)</p>
+                                <p>Tư vấn mua hàng cao cấp</p>
+                                <p><strong>0899 668 225</strong></p>
+                                <p>Trung tâm CSKH (08:30 - 21:30)</p>
+                                <p><strong>1900 63 66 82</strong></p>
+                                <p>Email ưu tiên: <strong>concierge@thegioicongnghe.vn</strong></p>
+                                <p>Địa chỉ showroom: <strong>Grand Tech Hub, Hà Đông, Hà Nội</strong></p>
                             </div>
-                        </div>
-
-                        <div className="footer__col">
-                            <h4>{t('about_us')}</h4>
-                            <ul className="footer-links">
-                                <li><a href="#">{t('our_company')}</a></li>
-                                <li><a href="#">{t('rules')}</a></li>
-                                <li><a href="#">{t('enterprise_project')}</a></li>
-                                <li><a href="#">{t('promo_news')}</a></li>
-                                <li><a href="#">{t('used_devices')}</a></li>
-                                <li><a href="#">{t('guide_payment')}</a></li>
-                                <li><a href="#">{t('apple_warranty')}</a></li>
-                                <li><a href="#">{t('invoice_lookup')}</a></li>
-                                <li><a href="#">{t('warranty_lookup')}</a></li>
-                                <li><a href="#">{t('faq')}</a></li>
-                            </ul>
-                        </div>
-
-                        <div className="footer__col">
-                            <h4>{t('policy')}</h4>
-                            <ul className="footer-links">
-                                <li><a href="#">{t('warranty_policy')}</a></li>
-                                <li><a href="#">{t('return_policy')}</a></li>
-                                <li><a href="#">{t('privacy_policy')}</a></li>
-                                <li><a href="#">{t('installment_policy')}</a></li>
-                                <li><a href="#">{t('unbox_policy')}</a></li>
-                                <li><a href="#">{t('shipping_policy')}</a></li>
-                                <li><a href="#">{t('mobile_policy')}</a></li>
-                                <li><a href="#">{t('data_policy')}</a></li>
-                                <li><a href="#">{t('support_policy')}</a></li>
-                                <li><a href="#">{t('appliance_policy')}</a></li>
-                            </ul>
-                        </div>
-
-
-                        <div className="footer__col">
-                            <h4>{t('payment_support')}</h4>
+                            <a className="footer-cta" href="https://thegioicongnghe.vn/book-private-demo">
+                                Đặt lịch tư vấn riêng
+                            </a>
+                            <h4 className="mt-4">Phương thức thanh toán</h4>
                             <div className="payment-methods">
                                 <div className="payment-row">
                                     <div className="payment-item">
@@ -973,54 +959,7 @@ const Footer = () => {
                                         <img src="./momo_icon1.svg" alt="Momo" />
                                     </div>
                                 </div>
-
-                                <div className="payment-row">
-                                    <div className="payment-item">
-                                        <img src="./momo_icon1.svg" alt="Momo" />
-                                    </div>
-                                    <div className="payment-item">
-                                        <img src="./momo_icon1.svg" alt="Momo" />
-                                    </div>
-                                    <div className="payment-item">
-                                        <img src="./momo_icon1.svg" alt="Momo" />
-                                    </div>
-                                    <div className="payment-item">
-                                        <img src="./momo_icon1.svg" alt="Momo" />
-                                    </div>
-                                </div>
-
-                                <div className="payment-row">
-                                    <div className="payment-item">
-                                        <img src="./momo_icon.svg" alt="Momo" />
-                                    </div>
-                                    <div className="payment-item">
-                                        <img src="./momo_icon.svg" alt="Momo" />
-                                    </div>
-                                    <div className="payment-item">
-                                        <img src="./momo_icon.svg" alt="Momo" />
-                                    </div>
-                                    <div className="payment-item">
-                                        <img src="./momo_icon.svg" alt="Momo" />
-                                    </div>
-                                </div>
-
-                                <div className="payment-row">
-                                    <div className="payment-item">
-                                        <img src="./momo_icon.svg" alt="Momo" />
-                                    </div>
-                                    <div className="payment-item">
-                                        <img src="./momo_icon.svg" alt="Momo" />
-                                    </div>
-                                    <div className="payment-item">
-                                        <img src="./momo_icon.svg" alt="Momo" />
-                                    </div>
-                                    <div className="payment-item">
-                                        <img src="./momo_icon.svg" alt="Momo" />
-                                    </div>
-                                </div>
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -1030,11 +969,10 @@ const Footer = () => {
                 <div className="container">
                     <div className="copy-right">
                         <p>
-                            <NavLink className="nav-link" to="/" >{t('copyright')} &nbsp;</NavLink> - All rights reserved © 2026 - Designed by&nbsp;
-                            <span style={{ color: "#eee", fontWeight: "bold" }}>Nguyễn Quang Linh</span>
+                            © 2026 Thế giới công nghệ - Elevating Everyday Tech.
                         </p>
                     </div>
-                    <p>{t("phone-num")}: 012 3456 789. Email: abc@st.phenikaa-uni.edu.vn.</p>
+                    <p>Hotline: 1900 63 66 82 - Email: concierge@thegioicongnghe.vn - MST: 0109 888 321</p>
                 </div>
             </div>
         </footer>

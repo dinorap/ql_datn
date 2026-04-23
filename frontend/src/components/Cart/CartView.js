@@ -16,6 +16,8 @@ import { CurrentlyViewedSlider, SuggestCartSlider } from '../ViewProduct/HomeVie
 import { getLocalCartCount } from '../ViewProduct/count';
 import { getBundledProducts } from '../../services/apiViewService';
 import AddressSelector from '../../page/User/AddressSelector';
+import CardPaymentModal from '../Payment/CardPaymentModal';
+import MomoPaymentModal from '../Payment/MomoPaymentModal';
 const CartView = () => {
   const navigate = useNavigate();
 
@@ -51,6 +53,12 @@ const CartView = () => {
   const [reloadSuggest, setReloadSuggest] = useState(0);
   const hasLoadedSavedData = useRef(false);
   const [selectedBundles, setSelectedBundles] = useState({});
+  const [showCardPaymentModal, setShowCardPaymentModal] = useState(false);
+  const [isTestingCardPayment, setIsTestingCardPayment] = useState(false);
+  const [pendingCardOrder, setPendingCardOrder] = useState(null);
+  const [showMomoPaymentModal, setShowMomoPaymentModal] = useState(false);
+  const [isTestingMomoPayment, setIsTestingMomoPayment] = useState(false);
+  const [pendingMomoOrder, setPendingMomoOrder] = useState(null);
   const [bundleList, setBundleList] = useState({}); useEffect(() => {
     const hasData = name || phone;
     console.log(selectedBundles)
@@ -466,12 +474,19 @@ const CartView = () => {
     return giftSet.size;
   };
 
-  const handleSubmitOrder = async () => {
-    if (!validateOrder()) {
-      console.log(errors);
-      return;
-    }
+  const isCardPaymentMethod = (methodObj) => {
+    if (!methodObj) return false;
+    const raw = `${methodObj.code || ""} ${methodObj.name || ""}`.toLowerCase();
+    return /the|thẻ|card|visa|master|atm|chuyen khoan|chuyển khoản|bank/.test(raw);
+  };
 
+  const isMomoPaymentMethod = (methodObj) => {
+    if (!methodObj) return false;
+    const raw = `${methodObj.code || ""} ${methodObj.name || ""}`.toLowerCase();
+    return /momo/.test(raw);
+  };
+
+  const buildOrderDraft = () => {
     let shipping_address = "";
     let address_id = null;
     let selectedAddr = null;
@@ -479,7 +494,7 @@ const CartView = () => {
       selectedAddr = addresses.find((a) => a.id === selectedAddressId);
       if (!selectedAddr) {
         toast.warning("Vui lòng chọn địa chỉ giao hàng!");
-        return;
+        return null;
       }
       shipping_address = `${selectedAddr.detail_address}, ${selectedAddr.ward_name}, ${selectedAddr.district_name}, ${selectedAddr.city_name}`;
       address_id = selectedAddr.id;
@@ -506,9 +521,7 @@ const CartView = () => {
     for (const mainProductId in selectedBundles) {
       const bundleIds = selectedBundles[mainProductId] || [];
       const bundles = bundleList[mainProductId] || [];
-
       const parentProduct = selectedCartItems.find(p => p.product_id === Number(mainProductId));
-
       for (const bundleId of bundleIds) {
         const bundle = bundles.find(b => b.bundled_product_id === bundleId);
         if (bundle && parentProduct) {
@@ -529,25 +542,104 @@ const CartView = () => {
         }
       }
     }
-
     const allItems = [...cart_items, ...bundleItems];
 
-    const payload = {
-      email: account.email,
-      user_id: account.id,
-      cart_items: allItems,
-      total_price: total,
-      payment_method_id: Number(selectedMethod),
-      delivery_method: method,
-      pickup_location_id: method === 'pickup' ? selectedStore : null,
-      shipping_address,
-      address_id,
-      phone: orderPhone,
-      customer_name: orderName,
-      receiver_name: isReceiverDifferent ? receiverName : null,
-      receiver_phone: isReceiverDifferent ? receiverPhone : null,
-      note
+    return {
+      payload: {
+        email: account.email,
+        user_id: account.id,
+        cart_items: allItems,
+        total_price: total,
+        payment_method_id: Number(selectedMethod),
+        delivery_method: method,
+        pickup_location_id: method === 'pickup' ? selectedStore : null,
+        shipping_address,
+        address_id,
+        phone: orderPhone,
+        customer_name: orderName,
+        receiver_name: isReceiverDifferent ? receiverName : null,
+        receiver_phone: isReceiverDifferent ? receiverPhone : null,
+        note
+      },
+      allItems,
+      orderName
     };
+  };
+
+  const finalizeOrderSuccess = async ({ allItems, orderName }) => {
+    toast.success("Đơn hàng của bạn đã được đặt");
+    handleSendOrderMail({
+      email: account.email,
+      name: orderName,
+      cart_items: allItems,
+      total: total
+    });
+
+    for (const item of selectedCartItems) {
+      await deleteCartItem(item.cart_item_id);
+    }
+    const resCount = await getCartCount(account?.id);
+    dispatch(setCartCount(resCount?.EC === 0 ? Number(resCount.count) : 0));
+
+    await fetchCart();
+    setShowPay(false);
+    setShowCart(true);
+    setShowCardPaymentModal(false);
+    setShowMomoPaymentModal(false);
+    setPendingCardOrder(null);
+    setPendingMomoOrder(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleTestCardPayment = async () => {
+    if (!pendingCardOrder?.payload) return;
+    setIsTestingCardPayment(true);
+    try {
+      const res = await createOrder(pendingCardOrder.payload);
+      if (res && res.EC === 0) {
+        await finalizeOrderSuccess({
+          allItems: pendingCardOrder.allItems,
+          orderName: pendingCardOrder.orderName
+        });
+      } else {
+        toast.error(res?.EM || "Không thể hoàn tất thanh toán thử");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.EM || "Lỗi thanh toán thử");
+    } finally {
+      setIsTestingCardPayment(false);
+    }
+  };
+
+  const handleTestMomoPayment = async () => {
+    if (!pendingMomoOrder?.payload) return;
+    setIsTestingMomoPayment(true);
+    try {
+      const res = await createOrder(pendingMomoOrder.payload);
+      if (res && res.EC === 0) {
+        await finalizeOrderSuccess({
+          allItems: pendingMomoOrder.allItems,
+          orderName: pendingMomoOrder.orderName
+        });
+      } else {
+        toast.error(res?.EM || "Không thể hoàn tất thanh toán MoMo thử");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.EM || "Lỗi thanh toán MoMo thử");
+    } finally {
+      setIsTestingMomoPayment(false);
+    }
+  };
+
+  const handleSubmitOrder = async () => {
+    if (!validateOrder()) {
+      console.log(errors);
+      return;
+    }
+    const draft = buildOrderDraft();
+    if (!draft) return;
+    const { payload, allItems, orderName } = draft;
+    const selectedMethodObj = paymentMethod.find((m) => Number(m.id) === Number(selectedMethod));
 
     if (Number(selectedMethod) === 4) {
       const res = await createVnpayPayment(Number(total));
@@ -572,27 +664,21 @@ const CartView = () => {
       return;
     }
 
+    if (isMomoPaymentMethod(selectedMethodObj)) {
+      setPendingMomoOrder({ payload, allItems, orderName });
+      setShowMomoPaymentModal(true);
+      return;
+    }
+
+    if (isCardPaymentMethod(selectedMethodObj)) {
+      setPendingCardOrder({ payload, allItems, orderName });
+      setShowCardPaymentModal(true);
+      return;
+    }
+
     const res = await createOrder(payload);
     if (res && res.EC === 0) {
-      toast.success("Đơn hàng của bạn đã được đặt");
-      handleSendOrderMail({
-        email: account.email,
-        name: orderName,
-        cart_items: allItems,
-        total: total
-      });
-
-      for (const item of selectedCartItems) {
-        await deleteCartItem(item.cart_item_id);
-        const resCount = await getCartCount(account?.id);
-        dispatch(setCartCount(resCount?.EC === 0 ? Number(resCount.count) : 0));
-      }
-
-      await fetchCart();
-      setShowPay(false);
-      setShowCart(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      console.log("Tạo đơn hàng thành công!", res.data);
+      await finalizeOrderSuccess({ allItems, orderName });
     }
   };
 
@@ -1324,6 +1410,28 @@ const CartView = () => {
         </div>
       </div >
       <SuggestCartSlider reloadTrigger={reloadSuggest} />
+      <CardPaymentModal
+        isOpen={showCardPaymentModal}
+        amount={pendingCardOrder?.payload?.total_price || total}
+        loading={isTestingCardPayment}
+        onClose={() => {
+          if (isTestingCardPayment) return;
+          setShowCardPaymentModal(false);
+          setPendingCardOrder(null);
+        }}
+        onTestPayment={handleTestCardPayment}
+      />
+      <MomoPaymentModal
+        isOpen={showMomoPaymentModal}
+        amount={pendingMomoOrder?.payload?.total_price || total}
+        loading={isTestingMomoPayment}
+        onClose={() => {
+          if (isTestingMomoPayment) return;
+          setShowMomoPaymentModal(false);
+          setPendingMomoOrder(null);
+        }}
+        onTestPayment={handleTestMomoPayment}
+      />
     </>
   );
 };

@@ -1,4 +1,47 @@
 const connection = require('../config/database');
+const { enqueueReviewSummaryJob } = require("../services/reviewSummaryService");
+const createAdminReview = async (req, res) => {
+    try {
+        const { product_id, user_id, rating, comment } = req.body;
+        if (!product_id || !rating || !comment) {
+            return res.status(400).json({
+                EC: 1,
+                EM: "Thiếu product_id, rating hoặc comment",
+            });
+        }
+
+        const normalizedRating = Number(rating);
+        if (!Number.isFinite(normalizedRating) || normalizedRating < 1 || normalizedRating > 5) {
+            return res.status(400).json({
+                EC: 1,
+                EM: "Số sao phải từ 1 đến 5",
+            });
+        }
+
+        const [result] = await connection.query(
+            `INSERT INTO product_reviews (product_id, user_id, rating, comment, parent_id, is_active)
+             VALUES (?, ?, ?, ?, NULL, 1)`,
+            [product_id, user_id || null, normalizedRating, String(comment).trim()]
+        );
+
+        await enqueueReviewSummaryJob(product_id, "admin_review_created");
+
+        return res.status(200).json({
+            EC: 0,
+            EM: "Tạo đánh giá thành công",
+            data: {
+                id: result.insertId,
+            },
+        });
+    } catch (error) {
+        console.error("createAdminReview error:", error);
+        return res.status(500).json({
+            EC: 2,
+            EM: "Lỗi server khi tạo đánh giá",
+        });
+    }
+};
+
 const getAllReviewsWithPaginate = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -177,6 +220,10 @@ const deleteAdminReply = async (req, res) => {
 const deleteUserReview = async (req, res) => {
     try {
         const { id } = req.params;
+        const [rows] = await connection.query(
+            `SELECT product_id FROM product_reviews WHERE id = ? AND parent_id IS NULL LIMIT 1`,
+            [id]
+        );
 
         const [result] = await connection.query(
             `DELETE FROM product_reviews 
@@ -186,6 +233,10 @@ const deleteUserReview = async (req, res) => {
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ EC: 1, EM: "Không tìm thấy đánh giá" });
+        }
+
+        if (rows[0]?.product_id) {
+            await enqueueReviewSummaryJob(rows[0].product_id, "review_deleted");
         }
 
         return res.json({
@@ -209,6 +260,11 @@ const updateReviewActiveStatus = async (req, res) => {
             });
         }
 
+        const [rows] = await connection.query(
+            `SELECT product_id FROM product_reviews WHERE id = ? LIMIT 1`,
+            [id]
+        );
+
         const [result] = await connection.query(
             `UPDATE product_reviews SET is_active = ? WHERE id = ?`,
             [is_active ? 1 : 0, id]
@@ -219,6 +275,10 @@ const updateReviewActiveStatus = async (req, res) => {
                 EC: 2,
                 EM: "Không tìm thấy đánh giá để cập nhật!"
             });
+        }
+
+        if (is_active && rows[0]?.product_id) {
+            await enqueueReviewSummaryJob(rows[0].product_id, "review_approved");
         }
 
         return res.status(200).json({
@@ -235,6 +295,7 @@ const updateReviewActiveStatus = async (req, res) => {
     }
 };
 module.exports = {
+    createAdminReview,
     getAllReviewsWithPaginate,
     replyToReview,
     updateAdminReply,

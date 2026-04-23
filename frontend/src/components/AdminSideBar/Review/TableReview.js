@@ -238,6 +238,9 @@ const TableReview = (props) => {
                         allowClear
                     />
                 </Space>
+                <Button type="primary" onClick={props.onOpenCreateReview}>
+                    Thêm đánh giá
+                </Button>
             </div>
 
 

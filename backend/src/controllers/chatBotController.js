@@ -44,9 +44,12 @@ QUY TẮC DỮ LIỆU CỬA HÀNG (bắt buộc):
 5. Phần "mo_ta_ngan" trong JSON là mô tả shop — ưu tiên dùng; không bịa thêm thông số kỹ thuật không có trong JSON hoặc trong câu hỏi.
 6. TUYỆT ĐỐI không được ghi trong câu trả lời cụm "(Tham khảo chung, không thuộc dữ liệu cửa hàng)" hay bất kỳ nhãn/tiền tố tương tự. Trả lời tự nhiên; nếu bổ sung hiểu biết chung (ngoài JSON) thì ngắn gọn, không gán giá hay chương trình cửa hàng cho phần đó.
 7. Hội thoại nhiều lượt: luôn đọc các lượt user/model phía trên. Câu ngắn như "còn màu nào", "giá màu X", "256GB bao nhiêu" là hỏi tiếp — trả lời đúng máy đó từ cac_mau_chi_tiet / cau_hinh; không liệt kê sản phẩm khác ngoài JSON.
-8. Luôn trả lời cùng ngôn ngữ khách đang dùng trong tin nhắn gần nhất (ví dụ: khách hỏi tiếng Anh thì trả lời tiếng Anh, hỏi tiếng Việt thì trả lời tiếng Việt). Giọng thân thiện, khoảng 3-8 câu, không dông dài.`;
+8. Luôn trả lời cùng ngôn ngữ khách đang dùng trong tin nhắn gần nhất (ví dụ: khách hỏi tiếng Anh thì trả lời tiếng Anh, hỏi tiếng Việt thì trả lời tiếng Việt). Giọng thân thiện, khoảng 3-8 câu, không dông dài.
+9. Nếu khách hỏi "sản phẩm hot", "bán chạy", "best seller" thì ưu tiên danh sách sản phẩm trong JSON đã được xếp theo bán chạy; nêu rõ hạng 1, hạng 2 (và có thể thêm hạng 3), không tự bịa ngoài JSON.`;
 
-const MAX_HISTORY_TURNS = 24;
+// Giu lich su ngan de tranh nhieu ngu canh cu.
+const MAX_HISTORY_TURNS = 8;
+const CATALOG_HISTORY_TURNS = 4;
 
 function parseChatHistory(raw) {
     if (!Array.isArray(raw)) return [];
@@ -77,12 +80,32 @@ function trimHistoryForGemini(history) {
 /** Gộp vài lượt gần nhất để tìm sản phẩm trong DB (tránh câu ngắn lạc ngữ cảnh). */
 function buildCatalogSearchText(message, history) {
     const lines = [];
-    for (const turn of history.slice(-14)) {
+    for (const turn of history.slice(-CATALOG_HISTORY_TURNS)) {
         if (turn.role !== "user") continue;
         lines.push(turn.text);
     }
     lines.push(String(message || "").trim());
     return lines.filter(Boolean).join("\n").slice(0, 12000);
+}
+
+function isFollowUpMessage(message) {
+    const text = String(message || "").trim().toLowerCase();
+    if (!text) return false;
+
+    const followUpPatterns = [
+        /\bcòn\b/,
+        /\bmàu\b/,
+        /\bgiá màu\b/,
+        /\bbao nhiêu\b/,
+        /\bphiên bản\b/,
+        /\b\d+gb\b/,
+        /\b256gb\b|\b512gb\b|\b1tb\b/,
+        /\bcon nào\b|\bmẫu nào\b/,
+    ];
+
+    // Câu ngắn thường là hỏi nối tiếp.
+    if (text.length <= 24) return true;
+    return followUpPatterns.some((re) => re.test(text));
 }
 
 function detectMessageLanguage(message) {
@@ -165,6 +188,8 @@ const chatBot = async (req, res) => {
         }
 
         const parsedHistory = parseChatHistory(history);
+        const useHistoryContext = isFollowUpMessage(message);
+        const effectiveHistory = useHistoryContext ? parsedHistory : [];
         const replyLanguage = detectMessageLanguage(message);
 
         if (isGreetingOnlyMessage(message)) {
@@ -187,7 +212,10 @@ const chatBot = async (req, res) => {
             candidatesTried: [],
         };
         try {
-            const catalogSearchText = buildCatalogSearchText(message, parsedHistory);
+            const catalogSearchText = buildCatalogSearchText(
+                message,
+                effectiveHistory
+            );
             catalogPayload = await getCatalogContextForMessage(catalogSearchText);
         } catch (dbErr) {
             console.error("Chatbot DB catalog:", dbErr);
@@ -208,7 +236,7 @@ const chatBot = async (req, res) => {
                 parts: [{ text: SYSTEM_INSTRUCTION }],
             },
             contents: buildGeminiContents(
-                parsedHistory,
+                effectiveHistory,
                 catalogJson,
                 message,
                 replyLanguage
