@@ -99,4 +99,4 @@ Vì vậy người dùng vẫn luôn thấy phần tóm tắt thay vì bị lỗ
 ## 8) Câu kết để thuyết trình
 
 Giải pháp này cân bằng được 3 yếu tố quan trọng:  
-**trải nghiệm người dùng tốt, tốc độ phản hồi nhanh và chi phí AI hợp lý**, đồng thời có lộ trình rõ ràng từ bản test realtime sang vận hành batch khi triển khai thực tế.
+**trải nghiệm người dùng tốt, tốc độ phản hồi nhanh và chi phí AI hợp lý**, đồng thời có lộ trình rõ ràng từ bản test realtime sang vận hành batch khi triển khai thực tế .

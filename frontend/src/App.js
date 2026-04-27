@@ -3,7 +3,6 @@ import { TopNav, Header, Footer, CoolPage } from './components/Header&Footer/Hea
 import { Outlet } from 'react-router-dom';
 import ChatBot from './components/ChatBot/ChatBot';
 import LiveChat from './components/ChatBot/LiveChat';
-import ChatWidgetController from './components/Header&Footer/ChatWidgetController';
 function App() {
   return (
     <div className="App">
@@ -15,7 +14,6 @@ function App() {
         </div>
         <ChatBot />
         <LiveChat />
-        <ChatWidgetController />
         <CoolPage />
         <Footer />
       </div>
